@@ -1,95 +1,40 @@
-# alx-project-nexus
-A modern online polling system built with Next.js, TypeScript, Redux, and TailwindCSS . The application allows to create polls, vote, and view real-time results with dynamic visualizations.”
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
 
+## Getting Started
 
-# 🗳️ Project Nexus – Online Polling System
+First, run the development server:
 
-## Overview
-Project Nexus is a modern **online polling web application** built with Next.js, TypeScript, Redux, and TailwindCSS. It allows users to create polls, vote on active polls, and view live results with dynamic visualizations. The goal of the application is to provide a simple, intuitive, and engaging way for communities to make decisions collectively.
-
----
-
-## ✨ Features
-- **Poll Creation** – Users can create polls with customizable options.  
-- **Voting System** – Active polls can be voted on instantly.  
-- **Real-Time Results** – Votes update dynamically without page refresh.  
-- **Dynamic Visualizations** – Poll results displayed using interactive charts.  
-- **Responsive Design** – Fully optimized for desktop and mobile browsers.  
-- **Form Validation** – Ensures polls are created with valid inputs.  
-- **Shareable Polls** – Each poll has a unique link for easy sharing.  
-
----
-
-## 🛠️ Tech Stack
-- **Framework**: Next.js (React)  
-- **Language**: TypeScript  
-- **State Management**: Redux Toolkit  
-- **Styling**: TailwindCSS  
-- **Data Persistence**: JSON file (simulating backend API)  
-- **Charts**: Chart.js / Recharts for dynamic visualizations  
-- **Deployment**: Vercel  
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js (v18 or later)  
-- npm or yarn  
-
-### Installation
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/alx-project-nexus.git
-
-# Navigate into the project directory
-cd alx-project-nexus
-
-# Install dependencies
-npm install
-```
-
-### Running the Application
-```bash
-# Start the development server
 npm run dev
-```
-Visit `http://localhost:3000` in your browser.
-
-### Building for Production
-```bash
-npm run build
-npm run start
-```
-
----
-
-## 📂 Project Structure
-```
-alx-project-nexus/
-├── app/                # Next.js app directory
-├── components/         # Reusable UI components
-├── data/               # JSON files for polls
-├── redux/              # Redux slices and store
-├── styles/             # Global and module styles
-└── README.md           # Project documentation
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
----
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## 📦 Deployment
-The application is deployed on **Vercel** for public access.  
-🔗 Live Demo: 
+You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
 
----
+[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
 
-## 📸 Screenshots
-*(Add screenshots of your Figma design or deployed app here to showcase UI)*
+The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
 
----
+This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## 📜 License
-This project is licensed free. You are free to use, modify, and distribute it with attribution.
+## Learn More
 
----
+To learn more about Next.js, take a look at the following resources:
 
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
