@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/sections/Footer";
-import { CopyToClipboard } from "react-copy-to-clipboard";
+//import { CopyToClipboard } from "react-copy-to-clipboard";
 
 const pollSlug = "project-feedback-survey-q3-2024";
 
