@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Navbar() {
-  const [user, setUser] = useState<{ role: "admin" | "user"; name?: string } | null>(null);
+  const [user, setUser] = useState<{ role: "admin" | "user"; email?: string; name?: string } | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -22,8 +23,13 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
+      setMenuOpen(false);
       const res = await fetch("/api/auth/logout", { method: "POST" });
-      if (res.ok) router.replace("/");
+      if (res.ok) {
+        setUser(null);
+        router.replace("/");
+        router.refresh();
+      }
     } catch {}
   };
 
@@ -48,7 +54,24 @@ export default function Navbar() {
               {user.role === "admin" && (
                 <Link href="/admin" className="text-sm font-medium text-foreground">Admin</Link>
               )}
-              <button onClick={handleLogout} className="border border-primary text-primary px-4 py-2 rounded-md text-sm font-medium">Logout</button>
+              <div className="relative">
+                <button
+                  onClick={() => setMenuOpen((v) => !v)}
+                  className="border border-primary text-primary px-4 py-2 rounded-md text-sm font-medium"
+                >
+                  {(user.name && user.email) ? `${user.name} (${user.email})` : (user.name || user.email || "Account")}
+                </button>
+                {menuOpen && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white border border-border rounded-md shadow-md">
+                    <button
+                      onClick={async () => { setMenuOpen(false); await handleLogout(); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             </>
           ) : (
             <>

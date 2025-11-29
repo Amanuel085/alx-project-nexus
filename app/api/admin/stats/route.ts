@@ -4,8 +4,8 @@ import { getAuthCookie, verifyToken } from "@/lib/auth";
 
 type CountRow = { count: number };
 
-export async function GET() {
-  const token = getAuthCookie();
+export async function GET(req: Request) {
+  const token = getAuthCookie(req);
   const user = token ? await verifyToken(token) : null;
   if (!user || user.role !== "admin") return NextResponse.json({ message: "Forbidden" }, { status: 403 });
 

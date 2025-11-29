@@ -8,7 +8,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const token = getAuthCookie();
+  const token = getAuthCookie(req);
   const payload = token ? await verifyToken(token) : null;
   if (!payload || payload.role !== "admin") {
     return NextResponse.json({ message: "Forbidden" }, { status: 403 });

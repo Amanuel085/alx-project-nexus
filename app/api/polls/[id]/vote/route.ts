@@ -3,7 +3,7 @@ import { query } from "@/lib/db";
 import { getAuthCookie, verifyToken } from "@/lib/auth";
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
-  const token = getAuthCookie();
+  const token = getAuthCookie(req);
   const user = token ? await verifyToken(token) : null;
   const { optionId } = await req.json();
   const pollId = Number(params.id);

@@ -18,7 +18,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
 }
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  const token = getAuthCookie();
+  const token = getAuthCookie(req);
   const user = token ? await verifyToken(token) : null;
   if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   const id = Number(params.id);
@@ -27,8 +27,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   return NextResponse.json({ message: "Updated" });
 }
 
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
-  const token = getAuthCookie();
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+  const token = getAuthCookie(req);
   const user = token ? await verifyToken(token) : null;
   if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   const id = Number(params.id);

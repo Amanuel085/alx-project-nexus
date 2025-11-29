@@ -38,20 +38,21 @@ export async function verifyToken(token: string) {
   }
 }
 
-export async function setAuthCookie(token: string) {
-  cookies().set(cookieName, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7,
-    sameSite: "lax",
-  });
-}
-
-export function clearAuthCookie() {
-  cookies().set(cookieName, "", { path: "/", maxAge: 0 });
-}
-
-export function getAuthCookie() {
-  return cookies().get(cookieName)?.value || null;
+export function getAuthCookie(req?: Request) {
+  if (req) {
+    const cookieHeader = req.headers.get("cookie") || "";
+    const parts = cookieHeader.split(/;\s*/);
+    for (const part of parts) {
+      const [name, ...rest] = part.split("=");
+      if (name === cookieName) {
+        return rest.join("=") || null;
+      }
+    }
+    return null;
+  }
+  try {
+    return cookies().get(cookieName)?.value || null;
+  } catch {
+    return null;
+  }
 }
