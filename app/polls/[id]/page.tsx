@@ -11,11 +11,17 @@ export default function PollDetailPage() {
   const [poll, setPoll] = useState<PollData | null>(null);
   const [selectedOption, setSelectedOption] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const pid = Array.isArray(id) ? id[0] : id;
+  const isNumeric = typeof pid === "string" && /^\d+$/.test(pid);
 
   useEffect(() => {
+    if (!pid || !isNumeric) {
+      if (pid) setError("Invalid poll");
+      return;
+    }
     (async () => {
       try {
-        const res = await fetch(`/api/polls/${id}`);
+        const res = await fetch(`/api/polls?id=${pid}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to load poll");
         setPoll(data);
@@ -24,19 +30,19 @@ export default function PollDetailPage() {
         setError(msg);
       }
     })();
-  }, [id]);
+  }, [pid, isNumeric]);
 
   const handleVote = async () => {
-    if (!selectedOption || !id) return;
+    if (!selectedOption || !pid || !isNumeric) return;
     try {
-      const res = await fetch(`/api/polls/${id}/vote`, {
+      const res = await fetch(`/api/polls/${pid}/vote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ optionId: selectedOption }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to vote");
-      const refreshed = await (await fetch(`/api/polls/${id}`)).json();
+      const refreshed = await (await fetch(`/api/polls/${pid}`)).json();
       setPoll(refreshed);
       setSelectedOption("");
     } catch (e) {

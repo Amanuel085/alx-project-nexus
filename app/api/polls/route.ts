@@ -9,8 +9,46 @@ import crypto from "crypto";
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
+    const idParam = url.searchParams.get("id");
     const category = url.searchParams.get("category");
     const q = url.searchParams.get("q");
+
+    if (idParam) {
+      const idNum = Number.parseInt(String(idParam).trim(), 10);
+      if (!Number.isFinite(idNum) || !Number.isInteger(idNum) || idNum <= 0) {
+        return NextResponse.json({ message: "Not found" }, { status: 404 });
+      }
+      const base = await query<{
+        id: number; question: string; description: string | null; image_path: string | null; created_at: string; total_votes: number; created_by: number; category_id: number | null
+      }[]>(
+        "SELECT id, question, description, image_path, created_at, total_votes, created_by, category_id FROM polls WHERE id = ? LIMIT 1",
+        [idNum]
+      );
+      if (!base.length) return NextResponse.json({ message: "Not found" }, { status: 404 });
+      const row = base[0];
+      let categoryName: string | null = null;
+      if (row.category_id) {
+        try {
+          const cat = await query<{ name: string }[]>("SELECT name FROM categories WHERE id = ? LIMIT 1", [row.category_id]);
+          categoryName = cat[0]?.name ?? null;
+        } catch {}
+      }
+      let options: { id: number; text: string; votes_count: number }[] = [];
+      try {
+        options = await query<{ id: number; text: string; votes_count: number }[]>("SELECT id, text, votes_count FROM poll_options WHERE poll_id = ?", [idNum]);
+      } catch {}
+      return NextResponse.json({
+        id: row.id,
+        question: row.question,
+        description: row.description,
+        image_path: row.image_path,
+        created_at: row.created_at,
+        total_votes: row.total_votes,
+        created_by: row.created_by,
+        category: categoryName,
+        options,
+      });
+    }
 
     let sql = `SELECT p.id, p.question, p.description, p.image_path, p.created_at, p.total_votes, c.name as category, u.name as created_by
                FROM polls p
