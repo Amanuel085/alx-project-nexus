@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
 import type { ResultSetHeader } from "mysql2/promise";
+import nodemailer from "nodemailer";
 
 export async function POST(req: Request) {
   try {
@@ -29,8 +30,34 @@ export async function POST(req: Request) {
       [insertId, token, expires]
     );
 
+    const baseURL = new URL(req.url).origin;
+    const verifyLink = `${baseURL}/api/auth/verify?token=${token}`;
+
+    const host = process.env.SMTP_HOST;
+    const port = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 0;
+    const user = process.env.SMTP_USER;
+    const pass = process.env.SMTP_PASS;
+    const from = process.env.MAIL_FROM || "no-reply@pollify.local";
+
+    if (host && port && user && pass) {
+      const transporter = nodemailer.createTransport({
+        host,
+        port,
+        secure: port === 465,
+        auth: { user, pass },
+      });
+      await transporter.sendMail({
+        from,
+        to: email,
+        subject: "Verify your Pollify account",
+        html: `<p>Hi ${name},</p><p>Please verify your email to activate your Pollify account.</p><p><a href="${verifyLink}">Click here to verify</a></p>`,
+        text: `Verify your email: ${verifyLink}`,
+      });
+    }
+
     return NextResponse.json({ message: "Verification sent", token }, { status: 201 });
-  } catch (err: any) {
-    return NextResponse.json({ message: err.message || "Server error" }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Server error";
+    return NextResponse.json({ message }, { status: 500 });
   }
 }

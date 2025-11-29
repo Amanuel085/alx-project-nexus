@@ -1,15 +1,41 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-  const handleLogin = () => {
-    console.log("Logging in:", { email, password });
-    // Add authentication logic here
+  const handleLogin = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ message: "Login failed" }));
+        throw new Error(data.message || "Login failed");
+      }
+      const data = await res.json();
+      if (data?.role === "admin") {
+        router.replace("/admin");
+      } else {
+        router.replace("/polls");
+      }
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Login failed";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -46,10 +72,15 @@ export default function LoginPage() {
 
           <button
             onClick={handleLogin}
-            className="bg-[#34967C] text-white px-6 py-3 rounded-md font-medium w-full mt-4"
+            disabled={loading}
+            className={`px-6 py-3 rounded-md font-medium w-full mt-4 ${loading ? "bg-[#34967C]/60 cursor-not-allowed text-white" : "bg-[#34967C] text-white"}`}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
+
+          {error && (
+            <p className="text-sm text-red-600 mt-3 text-center">{error}</p>
+          )}
 
           <p className="text-sm text-[#7E7B7B] mt-4 text-center">
             Don’t have an account?{" "}

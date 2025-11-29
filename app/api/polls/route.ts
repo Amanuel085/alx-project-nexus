@@ -13,7 +13,7 @@ export async function GET(req: Request) {
              LEFT JOIN categories c ON c.id = p.category_id
              LEFT JOIN users u ON u.id = p.created_by
              WHERE p.is_active = 1`;
-  const params: any[] = [];
+  const params: (string | number)[] = [];
   if (category && category !== "all") { sql += " AND c.slug = ?"; params.push(category); }
   if (q) { sql += " AND p.question LIKE ?"; params.push(`%${q}%`); }
   sql += " ORDER BY p.created_at DESC";

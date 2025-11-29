@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
-import { verifyPassword, signToken, setAuthCookie } from "@/lib/auth";
+import { verifyPassword, signToken } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -19,9 +19,17 @@ export async function POST(req: Request) {
     }
 
     const token = await signToken({ sub: String(user.id), role: user.role, email: user.email });
-    await setAuthCookie(token);
-    return NextResponse.json({ id: user.id, name: user.name, role: user.role });
-  } catch (err: any) {
-    return NextResponse.json({ message: err.message || "Server error" }, { status: 500 });
+    const res = NextResponse.json({ id: user.id, name: user.name, role: user.role });
+    res.cookies.set("pollify_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+      sameSite: "lax",
+    });
+    return res;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Server error";
+    return NextResponse.json({ message }, { status: 500 });
   }
 }

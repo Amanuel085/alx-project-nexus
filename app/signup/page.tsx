@@ -9,10 +9,30 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [verifyToken, setVerifyToken] = useState<string | null>(null);
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (!name || !email || !password || password !== confirm) return;
-    setSubmitted(true);
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Signup failed");
+      setVerifyToken(data.token || null);
+      setSubmitted(true);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Signup failed";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -69,10 +89,15 @@ export default function SignupPage() {
 
               <button
                 onClick={handleSignup}
-                className="bg-primary text-primary-foreground px-6 py-3 rounded-md font-medium w-full mt-2"
+                disabled={loading}
+                className={`px-6 py-3 rounded-md font-medium w-full mt-2 ${loading ? "bg-primary/60 cursor-not-allowed text-primary-foreground" : "bg-primary text-primary-foreground"}`}
               >
-                Sign Up
+                {loading ? "Signing up..." : "Sign Up"}
               </button>
+
+              {error && (
+                <p className="text-sm text-red-600 mt-3 text-center">{error}</p>
+              )}
 
               <p className="text-sm text-muted-foreground mt-4 text-center">
                 Already have an account?{" "}
@@ -85,6 +110,11 @@ export default function SignupPage() {
               <p className="text-sm text-muted-foreground">
                 We sent a verification link to <span className="font-medium text-foreground">{email}</span>. Please click the link to activate your account and continue.
               </p>
+              {verifyToken && (
+                <p className="text-sm">
+                  For testing, open <Link href={`/verify?token=${verifyToken}`} className="text-primary underline">this verification link</Link>.
+                </p>
+              )}
               <p className="text-sm text-muted-foreground">
                 Didn’t get the email? Check your spam folder or <button className="underline text-primary">resend</button>.
               </p>

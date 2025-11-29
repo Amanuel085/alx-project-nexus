@@ -17,7 +17,10 @@ export function getDB() {
   return pool;
 }
 
-export async function query<T = any>(sql: string, params: any[] = []) {
+export async function query<T>(
+  sql: string,
+  params: Array<string | number | Date | null> = []
+) {
   const conn = getDB();
   const [rows] = await conn.query(sql, params);
   return rows as T;

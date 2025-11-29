@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { clearAuthCookie } from "@/lib/auth";
 
 export async function POST() {
-  clearAuthCookie();
-  return NextResponse.json({ message: "Logged out" });
+  const res = NextResponse.json({ message: "Logged out" });
+  res.cookies.set("pollify_token", "", { path: "/", maxAge: 0 });
+  return res;
 }

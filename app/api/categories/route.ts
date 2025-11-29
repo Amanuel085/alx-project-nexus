@@ -3,7 +3,7 @@ import { query } from "@/lib/db";
 import { getAuthCookie, verifyToken } from "@/lib/auth";
 
 export async function GET() {
-  const rows = await query<any[]>("SELECT id, name, slug FROM categories ORDER BY name ASC");
+  const rows = await query<{ id: number; name: string; slug: string }[]>("SELECT id, name, slug FROM categories ORDER BY name ASC");
   return NextResponse.json(rows);
 }
 

@@ -15,5 +15,6 @@ export async function GET(req: Request) {
   await query("UPDATE users SET is_email_verified = 1 WHERE id = ?", [row.user_id]);
   await query("UPDATE email_verifications SET used_at = NOW() WHERE token = ?", [token]);
 
-  return NextResponse.json({ message: "Email verified" });
+  const redirectURL = new URL("/login", req.url);
+  return NextResponse.redirect(redirectURL);
 }
