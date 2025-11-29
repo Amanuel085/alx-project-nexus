@@ -61,9 +61,9 @@ export default function AdminDashboard() {
         <aside className="w-64 bg-[#F5F5F5] p-6 hidden md:block">
           <h2 className="text-xl font-bold mb-6">Pollify</h2>
           <nav className="space-y-4 text-sm font-medium">
-            <div>Dashboard</div>
-            <div>Manage Polls</div>
-            <div>Manage Users</div>
+            <a href="/admin" className="text-[#1A1A1A]">Dashboard</a>
+            <a href="/admin/polls" className="text-[#34967C]">Manage Polls</a>
+            <a href="/admin/users" className="text-[#34967C]">Manage Users</a>
             <div>Settings</div>
             <div>Logout</div>
           </nav>
@@ -72,7 +72,13 @@ export default function AdminDashboard() {
 
         {/* Main Content */}
         <section className="flex-1 px-8 py-12">
-          <h1 className="text-2xl font-bold mb-8">Admin Dashboard</h1>
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+            <div className="flex gap-4 text-sm font-medium">
+              <a href="/admin/polls" className="text-[#34967C]">Manage Polls</a>
+              <a href="/admin/users" className="text-[#34967C]">Manage Users</a>
+            </div>
+          </div>
 
           {/* Metrics */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
