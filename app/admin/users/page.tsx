@@ -33,6 +33,24 @@ export default function AdminUsersPage() {
     } catch {}
   };
 
+  const editUser = async (u: AdminUser) => {
+    const name = prompt("Edit name", u.name) ?? u.name;
+    const email = prompt("Edit email", u.email) ?? u.email;
+    const role = prompt("Edit role (admin/user)", u.role) ?? u.role;
+    try {
+      const res = await fetch(`/api/admin/users/${u.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, email, role }) });
+      if (res.ok) load();
+    } catch {}
+  };
+
+  const deleteUser = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
+      if (res.ok) load();
+    } catch {}
+  };
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       <section className="px-8 py-12 max-w-6xl mx-auto">
@@ -63,7 +81,11 @@ export default function AdminUsersPage() {
                   <td className="p-3">{u.is_email_verified ? "Yes" : "No"}</td>
                   <td className="p-3">{u.is_active ? "Active" : "Inactive"}</td>
                   <td className="p-3">
-                    <button className="text-primary" onClick={() => toggleActive(u.id, !!u.is_active)}>{u.is_active ? "Deactivate" : "Activate"}</button>
+                    <div className="flex gap-3">
+                      <button className="text-primary" onClick={() => toggleActive(u.id, !!u.is_active)}>{u.is_active ? "Deactivate" : "Activate"}</button>
+                      <button className="text-foreground" onClick={() => editUser(u)}>Edit</button>
+                      <button className="text-red-600" onClick={() => deleteUser(u.id)}>Delete</button>
+                    </div>
                   </td>
                 </tr>
               ))}

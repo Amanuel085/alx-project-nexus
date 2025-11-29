@@ -5,9 +5,9 @@ import { getAuthCookie, verifyToken } from "@/lib/auth";
 export async function GET(_: Request, { params }: { params: { id: string } }) {
   const id = Number(params.id);
   const poll = await query<{
-    id: number; question: string; description: string | null; created_at: string; total_votes: number; created_by: number; category: string | null
+    id: number; question: string; description: string | null; image_path: string | null; created_at: string; total_votes: number; created_by: number; category: string | null
   }[]>(
-    `SELECT p.id, p.question, p.description, p.created_at, p.total_votes, p.created_by,
+    `SELECT p.id, p.question, p.description, p.image_path, p.created_at, p.total_votes, p.created_by,
             c.name as category
      FROM polls p LEFT JOIN categories c ON c.id = p.category_id WHERE p.id = ?`,
     [id]

@@ -18,6 +18,9 @@ export default function PollList({ polls }: PollListProps) {
           href={`/polls/${poll.id}`}
           className="block p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
         >
+          {poll.imagePath && (
+            <img src={poll.imagePath} alt="Poll" className="w-full h-40 object-cover rounded-md mb-3" />
+          )}
           <h3 className="text-xl font-semibold mb-2">{poll.question}</h3>
           <div className="flex items-center text-sm text-gray-500">
             <span className="capitalize">{poll.category}</span>

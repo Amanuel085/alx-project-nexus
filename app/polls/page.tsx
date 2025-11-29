@@ -13,16 +13,9 @@ export default function PollsPage() {
     getPolls();
   }, [getPolls]);
 
-  const handleCreatePoll = async (pollData: {
-    question: string;
-    options: string[];
-    category: string;
-  }) => {
+  const handleCreatePoll = async (form: FormData) => {
     try {
-      await addPoll({
-        ...pollData,
-        createdBy: 'current-user-id', // This should come from your auth context
-      });
+      await addPoll(form);
     } catch (err) {
       console.error('Error creating poll:', err);
     }

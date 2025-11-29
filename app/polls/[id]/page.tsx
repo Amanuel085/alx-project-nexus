@@ -1,51 +1,80 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const dummyPoll = {
-  id: "1",
-  question: "What is your favorite programming language for web development?",
-  description:
-    "Help us understand the current trends in web development by picking your preferred language. Your input will shape our future content!",
-  options: [
-    "JavaScript/TypeScript",
-    "Python (Django/Flask)",
-    "PHP (Laravel/Symfony)",
-    "Ruby (Ruby on Rails)",
-    "Go (Gin/Echo)",
-  ],
-};
+type Option = { id: number; text: string; votes_count: number };
+type PollData = { id: number; question: string; description: string | null; image_path: string | null; options: Option[] };
 
 export default function PollDetailPage() {
   const { id } = useParams();
-  const [selectedOption, setSelectedOption] = useState("");
+  const [poll, setPoll] = useState<PollData | null>(null);
+  const [selectedOption, setSelectedOption] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
 
-  const handleVote = () => {
-    if (!selectedOption) return;
-    console.log(`Voted for: ${selectedOption}`);
-    // Dispatch Redux action or API call here
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`/api/polls/${id}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to load poll");
+        setPoll(data);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Failed to load poll";
+        setError(msg);
+      }
+    })();
+  }, [id]);
+
+  const handleVote = async () => {
+    if (!selectedOption || !id) return;
+    try {
+      const res = await fetch(`/api/polls/${id}/vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ optionId: selectedOption }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to vote");
+      const refreshed = await (await fetch(`/api/polls/${id}`)).json();
+      setPoll(refreshed);
+      setSelectedOption("");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to vote";
+      setError(msg);
+    }
   };
+
+  if (error) {
+    return <div className="px-8 py-12">{error}</div>;
+  }
+
+  if (!poll) {
+    return <div className="px-8 py-12">Loading...</div>;
+  }
 
   return (
     <main className="min-h-screen flex flex-col justify-between bg-white text-[#1A1A1A]">
       <section className="px-8 py-12 max-w-3xl mx-auto">
-        <h2 className="text-2xl font-bold mb-4">{dummyPoll.question}</h2>
-        <p className="text-[#7E7B7B] mb-8">{dummyPoll.description}</p>
+        {poll.image_path && (
+          <img src={poll.image_path} alt="Poll" className="w-full h-64 object-cover rounded-md mb-6" />
+        )}
+        <h2 className="text-2xl font-bold mb-4">{poll.question}</h2>
+        {poll.description && <p className="text-[#7E7B7B] mb-8">{poll.description}</p>}
 
         <h3 className="text-lg font-semibold mb-4">Cast Your Vote</h3>
         <form className="space-y-4 mb-8">
-          {dummyPoll.options.map((option) => (
-            <label key={option} className="flex items-center gap-3">
+          {poll.options.map((option) => (
+            <label key={option.id} className="flex items-center gap-3">
               <input
                 type="radio"
                 name="pollOption"
-                value={option}
-                checked={selectedOption === option}
-                onChange={() => setSelectedOption(option)}
+                value={String(option.id)}
+                checked={selectedOption === String(option.id)}
+                onChange={() => setSelectedOption(String(option.id))}
                 className="accent-[#34967C]"
               />
-              <span className="text-sm">{option}</span>
+              <span className="text-sm">{option.text}</span>
             </label>
           ))}
         </form>

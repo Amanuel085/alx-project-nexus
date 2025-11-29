@@ -41,19 +41,9 @@ export const usePollOperations = () => {
   );
 
   const addPoll = useCallback(
-    async (pollData: { question: string; options: string[]; category: string; createdBy: string }) => {
+    async (form: FormData) => {
       try {
-        const newPoll = {
-          question: pollData.question,
-          category: pollData.category,
-          createdBy: pollData.createdBy,
-          options: pollData.options.map((text, index) => ({
-            id: `option-${index}`,
-            text,
-            votes: 0,
-          })),
-        };
-        const result = await dispatch(createPollAction(newPoll)).unwrap();
+        const result = await dispatch(createPollAction(form)).unwrap();
         return result;
       } catch (err) {
         console.error('Failed to create poll:', err);

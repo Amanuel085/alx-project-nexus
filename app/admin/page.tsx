@@ -1,58 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
-const metrics = [
-  { label: "Total Polls", value: 1234, subtext: "Across all categories" },
-  { label: "Active Polls", value: 876, subtext: "Currently accepting votes" },
-  { label: "Total Votes", value: 56789, subtext: "Submitted this month" },
-  { label: "New Users", value: 125, subtext: "Joined in last 30 days" },
-];
-
-const polls = [
-  {
-    id: "1",
-    title: "Favorite Ice Cream Flavor",
-    category: "Food & Drinks",
-    votes: 5123,
-    status: "Active",
-  },
-  {
-    id: "2",
-    title: "Best Remote Work Tool",
-    category: "Technology",
-    votes: 3456,
-    status: "Active",
-  },
-  {
-    id: "3",
-    title: "Next Company Holiday Destination",
-    category: "Travel",
-    votes: 1890,
-    status: "Closed",
-  },
-  {
-    id: "4",
-    title: "Preferred Learning Style",
-    category: "Education",
-    votes: 987,
-    status: "Active",
-  },
-  {
-    id: "5",
-    title: "Top Book Genres",
-    category: "Culture",
-    votes: 2567,
-    status: "Closed",
-  },
-];
+type Metric = { label: string; value: number; subtext: string };
+type AdminPoll = { id: number; question: string; category: string | null; total_votes: number; is_active: number };
 
 export default function AdminDashboard() {
-  const [pollList, setPollList] = useState(polls);
+  const [metrics, setMetrics] = useState<Metric[]>([ 
+    { label: "Total Polls", value: 0, subtext: "Across all categories" },
+    { label: "Active Polls", value: 0, subtext: "Currently accepting votes" },
+    { label: "Total Votes", value: 0, subtext: "Submitted this month" },
+    { label: "New Users", value: 0, subtext: "Joined in last 30 days" },
+  ]);
+  const [pollList, setPollList] = useState<AdminPoll[]>([]);
 
-  const handleDelete = (id: string) => {
-    setPollList(pollList.filter((poll) => poll.id !== id));
-  };
+  useEffect(() => {
+    (async () => {
+      try {
+        const statsRes = await fetch("/api/admin/stats");
+        const stats = await statsRes.json();
+        if (statsRes.ok) {
+          setMetrics([
+            { label: "Total Polls", value: stats.totalPolls ?? 0, subtext: "Across all categories" },
+            { label: "Active Polls", value: stats.activePolls ?? 0, subtext: "Currently accepting votes" },
+            { label: "Total Votes", value: stats.totalVotes ?? 0, subtext: "Submitted this month" },
+            { label: "New Users", value: stats.newUsers ?? 0, subtext: "Joined in last 30 days" },
+          ]);
+        }
+      } catch {}
+
+      try {
+        const pollsRes = await fetch("/api/admin/polls");
+        const rows = await pollsRes.json();
+        if (pollsRes.ok) {
+          setPollList(rows.slice(0, 5));
+        }
+      } catch {}
+    })();
+  }, []);
 
   return (
     <main className="min-h-screen bg-white text-[#1A1A1A]">
@@ -112,23 +98,21 @@ export default function AdminDashboard() {
               <tbody>
                 {pollList.map((poll) => (
                   <tr key={poll.id} className="border-t">
-                    <td className="p-3">{poll.title}</td>
-                    <td className="p-3">{poll.category}</td>
-                    <td className="p-3">{poll.votes.toLocaleString()}</td>
-                    <td className="p-3">{poll.status}</td>
+                    <td className="p-3">{poll.question}</td>
+                    <td className="p-3">{poll.category || '-'}</td>
+                    <td className="p-3">{Number(poll.total_votes || 0).toLocaleString()}</td>
+                    <td className="p-3">{poll.is_active === 1 ? 'Active' : 'Inactive'}</td>
                     <td className="p-3 space-x-2">
-                      <button className="text-[#34967C] font-medium">Edit</button>
-                      <button
-                        className="text-red-500 font-medium"
-                        onClick={() => handleDelete(poll.id)}
-                      >
-                        Delete
-                      </button>
+                      <Link href={`/admin/polls`} className="text-[#34967C] font-medium">Edit</Link>
+                      <Link href={`/admin/polls`} className="text-red-500 font-medium">Delete</Link>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            <div className="mt-4">
+              <Link href="/admin/polls" className="text-[#34967C] font-medium">See more</Link>
+            </div>
           </div>
         </section>
       </div>

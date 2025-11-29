@@ -4,18 +4,21 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 interface CreatePollFormProps {
-  onSubmit: (data: { question: string; options: string[]; category: string }) => Promise<void>;
+  onSubmit: (form: FormData) => Promise<void>;
 }
 
 export default function CreatePollForm({ onSubmit }: CreatePollFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { register, handleSubmit, reset, watch, setValue } = useForm<{
     question: string;
+    description: string;
     options: string[];
     category: string;
+    image: FileList;
   }>({
     defaultValues: {
       question: '',
+      description: '',
       options: ['', ''],
       category: 'general',
     },
@@ -35,15 +38,19 @@ export default function CreatePollForm({ onSubmit }: CreatePollFormProps) {
     setValue('options', newOptions);
   };
 
-  const handleFormSubmit = async (data: { question: string; options: string[]; category: string }) => {
+  const handleFormSubmit = async (data: { question: string; description: string; options: string[]; category: string; image: FileList }) => {
     if (isSubmitting) return;
     
     try {
       setIsSubmitting(true);
-      await onSubmit({
-        ...data,
-        options: data.options.filter(option => option.trim() !== ''),
-      });
+      const form = new FormData();
+      form.append('question', data.question);
+      form.append('description', data.description || '');
+      form.append('category', data.category);
+      form.append('options', JSON.stringify(data.options.filter(option => option.trim() !== '')));
+      const file = data.image?.[0];
+      if (file) form.append('image', file);
+      await onSubmit(form);
       reset();
     } finally {
       setIsSubmitting(false);
@@ -62,6 +69,19 @@ export default function CreatePollForm({ onSubmit }: CreatePollFormProps) {
           {...register('question', { required: 'Question is required' })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           placeholder="Enter your question"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          Description
+        </label>
+        <textarea
+          id="description"
+          {...register('description')}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          placeholder="Add more details"
+          rows={3}
         />
       </div>
 
@@ -113,6 +133,19 @@ export default function CreatePollForm({ onSubmit }: CreatePollFormProps) {
           <option value="sports">Sports</option>
           <option value="other">Other</option>
         </select>
+      </div>
+
+      <div>
+        <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">
+          Image
+        </label>
+        <input
+          type="file"
+          id="image"
+          accept="image/*"
+          {...register('image')}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
       </div>
 
       <div className="pt-2">

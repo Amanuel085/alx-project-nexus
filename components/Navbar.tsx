@@ -3,11 +3,14 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [user, setUser] = useState<{ role: "admin" | "user"; email?: string; name?: string } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -18,6 +21,7 @@ export default function Navbar() {
       } catch {
         setUser(null);
       }
+      setLoaded(true);
     })();
   }, []);
 
@@ -41,12 +45,23 @@ export default function Navbar() {
           <span className="text-xl font-bold text-primary">Pollify</span>
         </Link>
         <nav className="hidden md:block">
-          <ul className="flex gap-8 text-sm font-medium text-foreground">
-            <li><Link href="/">Home</Link></li>
-            <li><Link href="/polls">Polls</Link></li>
-            <li><Link href="/about">About</Link></li>
-            <li><Link href="/contact">Contact</Link></li>
-          </ul>
+          {!loaded ? null : user?.role === "admin" ? (
+            <ul className="flex gap-8 text-sm font-medium text-foreground">
+              <li><Link href="/admin">Admin Dashboard</Link></li>
+              {pathname?.startsWith("/admin/") && (
+                <li>
+                  <button onClick={() => router.push("/admin")} className="text-sm font-medium text-foreground">Back</button>
+                </li>
+              )}
+            </ul>
+          ) : (
+            <ul className="flex gap-8 text-sm font-medium text-foreground">
+              <li><Link href="/">Home</Link></li>
+              <li><Link href="/polls">Polls</Link></li>
+              <li><Link href="/about">About</Link></li>
+              <li><Link href="/contact">Contact</Link></li>
+            </ul>
+          )}
         </nav>
         <div className="flex gap-4 items-center">
           {user ? (

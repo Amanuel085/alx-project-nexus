@@ -11,6 +11,8 @@ export interface PollOption {
 export interface Poll {
   id: string;
   question: string;
+  description?: string;
+  imagePath?: string;
   options: PollOption[];
   category: string;
   createdAt: string;
@@ -50,7 +52,32 @@ export const fetchPolls = createAsyncThunk<Poll[], void, { state: RootState }>(
     if (!response.ok) {
       throw new Error('Failed to fetch polls');
     }
-    return (await response.json()) as Poll[];
+    type RowOption = { id: number; text: string; votes_count: number };
+    type RowPoll = {
+      id: number;
+      question: string;
+      description?: string | null;
+      image_path?: string | null;
+      options?: RowOption[];
+      category?: string | null;
+      created_at: string;
+      created_by?: string | number;
+      is_active?: number;
+      total_votes?: number;
+    };
+    const rows = (await response.json()) as RowPoll[];
+    return rows.map((r) => ({
+      id: String(r.id),
+      question: r.question,
+      description: r.description ?? undefined,
+      imagePath: r.image_path ?? undefined,
+      options: (r.options || []).map((o: RowOption) => ({ id: String(o.id), text: o.text, votes: o.votes_count })),
+      category: r.category || 'other',
+      createdAt: r.created_at,
+      createdBy: String(r.created_by || ''),
+      isActive: r.is_active === undefined ? true : r.is_active === 1,
+      totalVotes: r.total_votes ?? 0,
+    })) as Poll[];
   }
 );
 
@@ -61,24 +88,51 @@ export const fetchPollById = createAsyncThunk<Poll, string, { state: RootState }
     if (!response.ok) {
       throw new Error('Failed to fetch poll');
     }
-    return (await response.json()) as Poll;
+    type RowOption = { id: number; text: string; votes_count: number };
+    type RowPoll = {
+      id: number;
+      question: string;
+      description?: string | null;
+      image_path?: string | null;
+      options?: RowOption[];
+      category?: string | null;
+      created_at: string;
+      created_by?: string | number;
+      is_active?: number;
+      total_votes?: number;
+    };
+    const r = (await response.json()) as RowPoll;
+    return {
+      id: String(r.id),
+      question: r.question,
+      description: r.description ?? undefined,
+      imagePath: r.image_path ?? undefined,
+      options: (r.options || []).map((o: RowOption) => ({ id: String(o.id), text: o.text, votes: o.votes_count })),
+      category: r.category || 'other',
+      createdAt: r.created_at,
+      createdBy: String(r.created_by || ''),
+      isActive: r.is_active === undefined ? true : r.is_active === 1,
+      totalVotes: r.total_votes ?? 0,
+    } as Poll;
   }
 );
 
 export const createPoll = createAsyncThunk<
   Poll,
-  Omit<Poll, 'id' | 'createdAt' | 'totalVotes' | 'isActive'>,
+  FormData,
   { state: RootState }
->('polls/createPoll', async (pollData) => {
+>('polls/createPoll', async (form) => {
   const response = await fetch('/api/polls', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(pollData),
+    body: form,
   });
   
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to create poll');
+    const errJson = (await response.json().catch(() => null)) as unknown;
+    const msg = typeof errJson === 'object' && errJson && 'message' in (errJson as Record<string, unknown>)
+      ? (errJson as { message?: string }).message
+      : undefined;
+    throw new Error(msg || 'Failed to create poll');
   }
   
   return (await response.json()) as Poll;
