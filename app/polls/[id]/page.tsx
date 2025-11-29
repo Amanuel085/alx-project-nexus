@@ -2,8 +2,6 @@
 
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/sections/Footer";
 
 const dummyPoll = {
   id: "1",
@@ -31,7 +29,6 @@ export default function PollDetailPage() {
 
   return (
     <main className="min-h-screen flex flex-col justify-between bg-white text-[#1A1A1A]">
-      <Navbar />
       <section className="px-8 py-12 max-w-3xl mx-auto">
         <h2 className="text-2xl font-bold mb-4">{dummyPoll.question}</h2>
         <p className="text-[#7E7B7B] mb-8">{dummyPoll.description}</p>
@@ -60,7 +57,6 @@ export default function PollDetailPage() {
           Submit Vote
         </button>
       </section>
-      <Footer />
     </main>
   );
 }

@@ -1,7 +1,5 @@
 "use client";
 
-import Navbar from "@/components/Navbar";
-import Footer from "@/sections/Footer";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -27,7 +25,6 @@ const votedPolls = [
 export default function ProfilePage() {
   return (
     <main className="min-h-screen bg-white text-[#1A1A1A]">
-      <Navbar />
       <section className="px-8 py-12 max-w-4xl mx-auto">
         {/* User Info */}
         <div className="flex items-center justify-between mb-8">
@@ -51,7 +48,7 @@ export default function ProfilePage() {
 
         {/* Polls Created */}
         <div className="mb-12">
-          <h3 className="text-lg font-semibold mb-4">Polls You've Created</h3>
+          <h3 className="text-lg font-semibold mb-4">Polls You&apos;ve Created</h3>
           <ul className="space-y-4">
             {createdPolls.map((poll) => (
               <li
@@ -77,7 +74,7 @@ export default function ProfilePage() {
 
         {/* Polls Voted On */}
         <div>
-          <h3 className="text-lg font-semibold mb-4">Polls You've Voted On</h3>
+          <h3 className="text-lg font-semibold mb-4">Polls You&apos;ve Voted On</h3>
           <ul className="space-y-4">
             {votedPolls.map((poll) => (
               <li
@@ -101,7 +98,6 @@ export default function ProfilePage() {
           </ul>
         </div>
       </section>
-      <Footer />
     </main>
   );
 }

@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/sections/Footer";
 
 const initialCategories = [
   { id: "1", name: "Electronics", icon: "📱", updated: "2023-10-26 14:30" },
@@ -41,7 +39,6 @@ export default function CategoryManagementPage() {
 
   return (
     <main className="min-h-screen bg-white text-[#1A1A1A]">
-      <Navbar />
       <section className="px-8 py-12 max-w-6xl mx-auto">
         <h2 className="text-2xl font-bold mb-6">Category Management</h2>
 
@@ -137,7 +134,6 @@ export default function CategoryManagementPage() {
           Showing 1–{filtered.length} of {categories.length} categories
         </p>
       </section>
-      <Footer />
     </main>
   );
 }

@@ -1,11 +1,8 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/sections/Footer";
 import Link from "next/link";
 
 export default function NotFoundPage() {
   return (
     <main className="min-h-screen bg-white text-[#1A1A1A] flex flex-col justify-between">
-      <Navbar />
       <section className="flex flex-col items-center justify-center flex-1 px-8 py-20 text-center">
         <h1 className="text-6xl font-bold text-[#34967C] mb-4">404</h1>
         <h2 className="text-2xl font-semibold mb-4">Page Not Found</h2>
@@ -33,7 +30,6 @@ export default function NotFoundPage() {
           Illustration Placeholder
         </div>
       </section>
-      <Footer />
     </main>
   );
 }

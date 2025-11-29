@@ -1,7 +1,5 @@
 "use client";
 
-import Navbar from "@/components/Navbar";
-import Footer from "@/sections/Footer";
 import { useState } from "react";
 
 const metrics = [
@@ -58,7 +56,6 @@ export default function AdminDashboard() {
 
   return (
     <main className="min-h-screen bg-white text-[#1A1A1A]">
-      <Navbar />
       <div className="flex">
         {/* Sidebar */}
         <aside className="w-64 bg-[#F5F5F5] p-6 hidden md:block">
@@ -129,7 +126,6 @@ export default function AdminDashboard() {
           </div>
         </section>
       </div>
-      <Footer />
     </main>
   );
 }

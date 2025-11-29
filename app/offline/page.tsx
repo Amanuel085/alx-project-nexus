@@ -1,11 +1,8 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/sections/Footer";
 import Link from "next/link";
 
 export default function OfflinePage() {
   return (
     <main className="min-h-screen bg-white text-[#1A1A1A] flex flex-col justify-between">
-      <Navbar />
       <section className="flex flex-col items-center justify-center flex-1 px-8 py-20 text-center">
         {/* Illustration Placeholder */}
         <div className="w-64 h-64 bg-[#F5F5F5] rounded-lg flex items-center justify-center text-[#7E7B7B] text-sm mb-8">
@@ -33,7 +30,6 @@ export default function OfflinePage() {
           </Link>
         </div>
       </section>
-      <Footer />
     </main>
   );
 }

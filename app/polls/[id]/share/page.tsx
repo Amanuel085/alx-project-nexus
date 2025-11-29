@@ -2,8 +2,6 @@
 
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/sections/Footer";
 //import { CopyToClipboard } from "react-copy-to-clipboard";
 
 const pollSlug = "project-feedback-survey-q3-2024";
@@ -15,7 +13,6 @@ export default function SharePollPage() {
 
   return (
     <main className="min-h-screen bg-white text-[#1A1A1A]">
-      <Navbar />
       <section className="px-8 py-12 max-w-3xl mx-auto">
         <h2 className="text-2xl font-bold mb-6">Share Your Poll</h2>
 
@@ -74,7 +71,6 @@ export default function SharePollPage() {
           </p>
         </div>
       </section>
-      <Footer />
     </main>
   );
 }

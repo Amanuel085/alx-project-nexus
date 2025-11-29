@@ -1,7 +1,5 @@
 "use client";
 
-import Navbar from "@/components/Navbar";
-import Footer from "@/sections/Footer";
 import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from "chart.js";
 import Link from "next/link";
@@ -48,7 +46,6 @@ const chartOptions = {
 export default function PollResultsPage() {
   return (
     <main className="min-h-screen flex flex-col justify-between bg-white text-[#1A1A1A]">
-      <Navbar />
       <section className="px-8 py-12 max-w-3xl mx-auto">
         <h2 className="text-2xl font-bold mb-4">{pollResults.question}</h2>
         <h3 className="text-lg font-semibold mb-6">Vote Distribution</h3>
@@ -82,7 +79,6 @@ export default function PollResultsPage() {
           </Link>
         </div>
       </section>
-      <Footer />
     </main>
   );
 }

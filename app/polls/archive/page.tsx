@@ -1,7 +1,5 @@
 "use client";
 
-import Navbar from "@/components/Navbar";
-import Footer from "@/sections/Footer";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -44,7 +42,6 @@ export default function PollArchivePage() {
 
   return (
     <main className="min-h-screen bg-white text-[#1A1A1A]">
-      <Navbar />
       <section className="px-8 py-12 max-w-6xl mx-auto">
         <h2 className="text-2xl font-bold mb-6">Poll Archive</h2>
 
@@ -110,7 +107,6 @@ export default function PollArchivePage() {
           Showing {filtered.length} of {archivedPolls.length} archived polls
         </p>
       </section>
-      <Footer />
     </main>
   );
 }

@@ -1,10 +1,6 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/sections/Footer";
-
 export default function LegalPage() {
   return (
     <main className="min-h-screen bg-white text-[#1A1A1A] flex flex-col justify-between">
-      <Navbar />
       <section className="px-8 py-12 max-w-4xl mx-auto">
         <h2 className="text-2xl font-bold mb-6">Terms of Service & Privacy Policy</h2>
         <p className="text-sm text-[#7E7B7B] mb-8">
@@ -57,7 +53,6 @@ export default function LegalPage() {
           </div>
         </div>
       </section>
-      <Footer />
     </main>
   );
 }

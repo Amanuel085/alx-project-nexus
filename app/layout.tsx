@@ -1,5 +1,3 @@
-'use client';
-
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/sections/Footer";
@@ -21,7 +19,7 @@ export default function RootLayout({
         <title>Pollify</title>
         <meta name="description" content="Create, vote, and decide together. Your voice matters." />
       </head>
-      <body className="bg-white text-[#1A1A1A]">
+      <body className="bg-background text-foreground">
         <ReduxProvider>
           {/* Global Navbar */}
           <Navbar />

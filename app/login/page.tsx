@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/sections/Footer";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -15,8 +13,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-white text-[#1A1A1A]">
-      <Navbar />
+    <main className="min-h-screen bg-background text-foreground">
       <section className="flex flex-col md:flex-row items-center justify-between px-8 py-12 max-w-5xl mx-auto">
         {/* Left: Login Form */}
         <div className="w-full md:w-1/2 mb-12 md:mb-0">
@@ -70,7 +67,6 @@ export default function LoginPage() {
           </div>
         </div>
       </section>
-      <Footer />
     </main>
   );
 }

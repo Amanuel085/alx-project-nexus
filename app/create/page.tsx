@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/sections/Footer";
 import { v4 as uuidv4 } from "uuid";
 
 export default function CreatePollPage() {
@@ -34,7 +32,6 @@ export default function CreatePollPage() {
 
   return (
     <main className="min-h-screen flex flex-col justify-between bg-white text-[#1A1A1A]">
-      <Navbar />
       <section className="px-8 py-12 max-w-3xl mx-auto">
         <h2 className="text-2xl font-bold mb-4">Create New Poll</h2>
         <p className="text-[#7E7B7B] mb-8">
@@ -91,7 +88,6 @@ export default function CreatePollPage() {
           Create Poll
         </button>
       </section>
-      <Footer />
     </main>
   );
 }
