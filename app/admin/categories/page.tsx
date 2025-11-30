@@ -65,7 +65,10 @@ export default function CategoryManagementPage() {
   return (
     <main className="min-h-screen bg-white text-[#1A1A1A]">
       <section className="px-8 py-12 max-w-6xl mx-auto">
-        <h2 className="text-2xl font-bold mb-6">Category Management</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">Category Management</h2>
+          <button onClick={() => history.back()} className="text-sm text-[#34967C] underline">Back</button>
+        </div>
         {message && <p className="text-green-600 mb-4 text-sm">{message}</p>}
         {error && <p className="text-red-600 mb-4 text-sm">{error}</p>}
 

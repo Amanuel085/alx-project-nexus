@@ -28,6 +28,8 @@ export default function Navbar() {
   const handleLogout = async () => {
     try {
       setMenuOpen(false);
+      const sure = typeof window !== 'undefined' ? window.confirm('Are you sure you want to log out?') : true;
+      if (!sure) return;
       const res = await fetch("/api/auth/logout", { method: "POST" });
       if (res.ok) {
         setUser(null);
@@ -73,12 +75,27 @@ export default function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setMenuOpen((v) => !v)}
-                  className="border border-primary text-primary px-4 py-2 rounded-md text-sm font-medium"
+                  className="h-9 w-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold"
                 >
-                  {(user.name && user.email) ? `${user.name} (${user.email})` : (user.name || user.email || "Account")}
+                  {(() => {
+                    const src = user?.name || user?.email || "";
+                    if (user?.name) {
+                      const parts = String(src).trim().split(/\s+/);
+                      const a = parts[0]?.[0] || "";
+                      const b = parts[1]?.[0] || "";
+                      return (a + b).toUpperCase() || (a || "").toUpperCase();
+                    } else {
+                      const before = String(src).split("@")[0] || "";
+                      return before.slice(0, 2).toUpperCase() || "?";
+                    }
+                  })()}
                 </button>
                 {menuOpen && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white border border-border rounded-md shadow-md">
+                  <div className="absolute right-0 mt-2 w-56 bg-white border border-border rounded-md shadow-md">
+                    <div className="px-4 py-3 border-b border-border">
+                      <div className="text-sm font-semibold">{user.name || "User"}</div>
+                      <div className="text-xs text-muted-foreground">{user.email || ""}</div>
+                    </div>
                     <Link
                       href="/settings"
                       onClick={() => setMenuOpen(false)}

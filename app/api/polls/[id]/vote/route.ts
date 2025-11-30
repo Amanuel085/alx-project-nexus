@@ -9,11 +9,20 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
     const body = await req.json().catch(() => ({} as { optionId?: string | number }));
-    const pollId = Number(params.id);
-    const optionIdNum = Number(body.optionId);
-    if (!Number.isFinite(optionIdNum) || optionIdNum <= 0) return NextResponse.json({ message: "Missing optionId" }, { status: 400 });
+    const pollId = Number.parseInt(String(params.id ?? "").trim(), 10);
+    if (!Number.isFinite(pollId) || !Number.isInteger(pollId) || pollId <= 0) {
+      return NextResponse.json({ message: "Not found" }, { status: 404 });
+    }
+    const optionIdNum = Number.parseInt(String(body.optionId ?? "").trim(), 10);
+    if (!Number.isFinite(optionIdNum) || !Number.isInteger(optionIdNum) || optionIdNum <= 0) {
+      return NextResponse.json({ message: "Missing optionId" }, { status: 400 });
+    }
 
     const voterId = Number(user.sub);
+    try { await query("ALTER TABLE votes ADD UNIQUE KEY uq_poll_user (poll_id, user_id)"); } catch {}
+
+    const pollExists = await query<{ id: number }[]>("SELECT id FROM polls WHERE id = ?", [pollId]);
+    if (!pollExists.length) return NextResponse.json({ message: "Not found" }, { status: 404 });
     const checkOpt = await query<{ id: number }[]>("SELECT id FROM poll_options WHERE id = ? AND poll_id = ?", [optionIdNum, pollId]);
     if (!checkOpt.length) return NextResponse.json({ message: "Invalid option" }, { status: 400 });
 

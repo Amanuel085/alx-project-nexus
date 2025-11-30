@@ -50,7 +50,9 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   const token = getAuthCookie(req);
   const user = token ? await verifyToken(token) : null;
   if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  const id = Number(params.id);
+  const idStr = String(params.id ?? "").trim();
+  const id = Number.parseInt(idStr, 10);
+  if (!Number.isFinite(id) || !Number.isInteger(id) || id <= 0) return NextResponse.json({ message: "Not found" }, { status: 404 });
   const body = await req.json();
   const fields: string[] = [];
   const values: unknown[] = [];
@@ -67,7 +69,9 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     const token = getAuthCookie(req);
     const user = token ? await verifyToken(token) : null;
     if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    const id = Number(params.id);
+    const idStr = String(params.id ?? "").trim();
+    const id = Number.parseInt(idStr, 10);
+    if (!Number.isFinite(id) || !Number.isInteger(id) || id <= 0) return NextResponse.json({ message: "Not found" }, { status: 404 });
     await query("DELETE FROM polls WHERE id = ? AND (created_by = ? OR ? = 'admin')", [id, Number(user.sub), user.role]);
     return NextResponse.json({ message: "Deleted" });
   } catch (err) {

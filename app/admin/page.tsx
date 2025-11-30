@@ -46,13 +46,22 @@ export default function AdminDashboard() {
         {/* Sidebar */}
         <aside className="w-64 bg-[#F5F5F5] p-6 hidden md:block">
           <h2 className="text-xl font-bold mb-6">Pollify</h2>
-          <nav className="space-y-4 text-sm font-medium">
-            <a href="/admin" className="text-[#1A1A1A]">Dashboard</a>
-            <a href="/admin/polls" className="text-[#34967C]">Manage Polls</a>
-            <a href="/admin/users" className="text-[#34967C]">Manage Users</a>
-            <a href="/admin/categories" className="text-[#34967C]">Manage Categories</a>
-            <div>Settings</div>
-            <div>Logout</div>
+          <nav className="flex flex-col gap-4 text-sm font-medium">
+            <a href="/admin" className="block text-[#1A1A1A]">Dashboard</a>
+            <a href="/admin/polls" className="block text-[#34967C]">Manage Polls</a>
+            <a href="/admin/users" className="block text-[#34967C]">Manage Users</a>
+            <a href="/admin/categories" className="block text-[#34967C]">Manage Categories</a>
+            <a href="/settings" className="block text-[#34967C]">Settings</a>
+            <button
+              onClick={async () => {
+                const sure = typeof window !== 'undefined' ? window.confirm('Are you sure you want to log out?') : true;
+                if (!sure) return;
+                try { await fetch('/api/auth/logout', { method: 'POST' }); window.location.href = '/'; } catch {}
+              }}
+              className="text-left text-[#34967C]"
+            >
+              Logout
+            </button>
           </nav>
           <div className="mt-12 text-xs text-[#7E7B7B]">Admin User</div>
         </aside>
@@ -61,10 +70,11 @@ export default function AdminDashboard() {
         <section className="flex-1 px-8 py-12">
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-            <div className="flex gap-4 text-sm font-medium">
+            <div className="flex items-center gap-4 text-sm font-medium">
               <a href="/admin/polls" className="text-[#34967C]">Manage Polls</a>
               <a href="/admin/users" className="text-[#34967C]">Manage Users</a>
               <a href="/admin/categories" className="text-[#34967C]">Manage Categories</a>
+              <button onClick={() => history.back()} className="text-[#34967C] underline">Back</button>
             </div>
           </div>
 

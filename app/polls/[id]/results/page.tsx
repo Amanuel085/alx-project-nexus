@@ -61,6 +61,9 @@ export default function PollResultsPage() {
   return (
     <main className="min-h-screen flex flex-col justify-between bg-white text-[#1A1A1A]">
       <section className="px-8 py-12 max-w-3xl mx-auto">
+        <div className="flex items-center justify-end mb-4">
+          <button onClick={() => history.back()} className="text-sm text-[#34967C] underline">Back</button>
+        </div>
         <h2 className="text-2xl font-bold mb-4">{poll.question}</h2>
         <h3 className="text-lg font-semibold mb-6">Vote Distribution</h3>
 

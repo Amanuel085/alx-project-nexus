@@ -10,6 +10,7 @@ export default function EditPollPage() {
   const { id } = useParams();
   const router = useRouter();
   const pid = Array.isArray(id) ? id[0] : id;
+  const isNumeric = typeof pid === 'string' && /^\d+$/.test(pid);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [options, setOptions] = useState<string[]>([]);
@@ -18,10 +19,21 @@ export default function EditPollPage() {
 
   useEffect(() => {
     (async () => {
-      if (!pid) return;
+      if (!pid || !isNumeric) {
+        setError('Invalid poll');
+        setLoading(false);
+        return;
+      }
       try {
-        const [res, meRes] = await Promise.all([fetch(`/api/polls/${pid}`), fetch('/api/me')]);
-        const data = await res.json();
+        const res = await fetch(`/api/polls/${pid}`);
+        let data = await res.json();
+        if (!res.ok) {
+          const res2 = await fetch(`/api/polls?id=${pid}`);
+          const data2 = await res2.json();
+          if (!res2.ok) throw new Error(data2.message || "Failed to load poll");
+          data = data2;
+        }
+        const meRes = await fetch('/api/me');
         const meData = await meRes.json().catch(() => ({ user: null }));
         if (!res.ok) throw new Error(data.message || "Failed to load poll");
         const row = data as PollRow;
@@ -40,7 +52,7 @@ export default function EditPollPage() {
         setLoading(false);
       }
     })();
-  }, [pid]);
+  }, [pid, isNumeric, router]);
 
   const handleOptionChange = (index: number, value: string) => {
     const updated = [...options];
@@ -98,7 +110,10 @@ export default function EditPollPage() {
   return (
     <main className="min-h-screen flex flex-col justify-between bg-white text-[#1A1A1A]">
       <section className="px-8 py-12 max-w-3xl mx-auto">
-        <h2 className="text-2xl font-bold mb-4">Edit Poll</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold">Edit Poll</h2>
+          <button onClick={() => history.back()} className="text-sm text-[#34967C] underline">Back</button>
+        </div>
         <p className="text-[#7E7B7B] mb-8">
           Update the details and options for your poll.
         </p>

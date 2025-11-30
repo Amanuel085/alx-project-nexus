@@ -56,9 +56,12 @@ export default function ProfilePage() {
               <p className="text-sm text-[#7E7B7B]">{me ? me.email : "Not signed in"}</p>
             </div>
           </div>
-          <Link href="/login" className="bg-[#34967C] text-white px-4 py-2 rounded-md text-sm font-medium">
-            {me ? "Edit Profile" : "Sign In"}
-          </Link>
+          <div className="flex items-center gap-3">
+            <button onClick={() => history.back()} className="text-sm text-[#34967C] underline">Back</button>
+            <Link href={me ? "/settings" : "/login"} className="bg-[#34967C] text-white px-4 py-2 rounded-md text-sm font-medium">
+              {me ? "Edit Profile" : "Sign In"}
+            </Link>
+          </div>
         </div>
 
         {status === "loading" && <p className="text-[#7E7B7B]">Loading...</p>}

@@ -92,7 +92,10 @@ export default function PollAnalyticsPage() {
   return (
     <main className="min-h-screen bg-white text-[#1A1A1A]">
       <section className="px-8 py-12 max-w-6xl mx-auto">
-        <h2 className="text-2xl font-bold mb-6">Poll Analytics</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">Poll Analytics</h2>
+          <button onClick={() => history.back()} className="text-sm text-[#34967C] underline">Back</button>
+        </div>
         {error && <p className="text-red-600 mb-6">{error}</p>}
 
         {/* Filters */}

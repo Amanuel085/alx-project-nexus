@@ -23,9 +23,14 @@ export default function PollDetailPage() {
     }
     (async () => {
       try {
-        const res = await fetch(`/api/polls?id=${pid}`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Failed to load poll");
+        const res = await fetch(`/api/polls/${pid}`);
+        let data = await res.json();
+        if (!res.ok) {
+          const res2 = await fetch(`/api/polls?id=${pid}`);
+          const data2 = await res2.json();
+          if (!res2.ok) throw new Error(data2.message || "Failed to load poll");
+          data = data2;
+        }
         setPoll(data);
         try {
           const meRes = await fetch("/api/me");
@@ -69,11 +74,20 @@ export default function PollDetailPage() {
   return (
     <main className="min-h-screen flex flex-col justify-between bg-white text-[#1A1A1A]">
       <section className="px-8 py-12 max-w-3xl mx-auto">
+        <div className="flex items-center justify-end mb-4">
+          <button onClick={() => history.back()} className="text-sm text-[#34967C] underline">Back</button>
+        </div>
         {poll.image_path && (
           <img src={poll.image_path} alt="Poll" className="w-full h-64 object-cover rounded-md mb-6" />
         )}
         <h2 className="text-2xl font-bold mb-4">{poll.question}</h2>
         {poll.description && <p className="text-[#7E7B7B] mb-8">{poll.description}</p>}
+
+        {poll.is_active === false && (
+          <div className="mb-6 p-4 border border-[#E5E5E5] rounded-md bg-[#F5F5F5] text-sm">
+            This poll is closed. You can still view its results.
+          </div>
+        )}
 
         <h3 className="text-lg font-semibold mb-4">Cast Your Vote</h3>
         <form className="space-y-4 mb-8">
@@ -86,6 +100,7 @@ export default function PollDetailPage() {
                 checked={selectedOption === String(option.id)}
                 onChange={() => setSelectedOption(String(option.id))}
                 className="accent-[#34967C]"
+                disabled={poll.is_active === false}
               />
               <span className="text-sm">{option.text}</span>
             </label>
@@ -94,7 +109,8 @@ export default function PollDetailPage() {
 
         <button
           onClick={handleVote}
-          className="bg-[#34967C] text-white px-6 py-3 rounded-md font-medium"
+          className="bg-[#34967C] text-white px-6 py-3 rounded-md font-medium disabled:opacity-60"
+          disabled={poll.is_active === false}
         >
           Submit Vote
         </button>
