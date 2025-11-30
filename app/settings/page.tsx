@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function SettingsPage() {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -12,19 +12,77 @@ export default function SettingsPage() {
   const [smsNotif, setSmsNotif] = useState(false);
 
   const [darkMode, setDarkMode] = useState(false);
+  const [savingPrefs, setSavingPrefs] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSavePassword = () => {
-    console.log("Password updated:", { currentPassword, newPassword });
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/user/settings');
+        const data = await res.json();
+        if (res.ok) {
+          setEmailNotif(Boolean(data.emailNotif));
+          setPushNotif(Boolean(data.pushNotif));
+          setSmsNotif(Boolean(data.smsNotif));
+          setDarkMode(Boolean(data.darkMode));
+        }
+      } catch {}
+    })();
+  }, []);
+
+  const handleSavePassword = async () => {
+    setMessage(null);
+    setError(null);
+    try {
+      const res = await fetch('/api/user/password', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ currentPassword, newPassword }) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || 'Failed to update password');
+      setMessage('Password updated');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to update password');
+    }
   };
 
-  const handleDeleteAccount = () => {
-    console.log("Account deleted");
+  const handleDeleteAccount = async () => {
+    setMessage(null);
+    setError(null);
+    try {
+      const res = await fetch('/api/user/delete', { method: 'POST' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || 'Failed to delete account');
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.href = '/';
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to delete account');
+    }
+  };
+
+  const savePreferences = async () => {
+    setSavingPrefs(true);
+    setMessage(null);
+    setError(null);
+    try {
+      const res = await fetch('/api/user/settings', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ emailNotif, pushNotif, smsNotif, darkMode }) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || 'Failed to save preferences');
+      setMessage('Preferences saved');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to save preferences');
+    } finally {
+      setSavingPrefs(false);
+    }
   };
 
   return (
     <main className="min-h-screen bg-white text-[#1A1A1A]">
       <section className="px-8 py-12 max-w-3xl mx-auto">
         <h2 className="text-2xl font-bold mb-6">App Settings</h2>
+        {message && <p className="text-green-600 mb-4 text-sm">{message}</p>}
+        {error && <p className="text-red-600 mb-4 text-sm">{error}</p>}
 
         {/* Change Password */}
         <div className="mb-12">
@@ -88,6 +146,11 @@ export default function SettingsPage() {
                 onChange={() => setSmsNotif(!smsNotif)}
               />
             </label>
+            <div className="pt-2">
+              <button onClick={savePreferences} disabled={savingPrefs} className="bg-[#34967C] text-white px-6 py-3 rounded-md font-medium">
+                {savingPrefs ? 'Saving...' : 'Save Preferences'}
+              </button>
+            </div>
           </div>
         </div>
 

@@ -10,6 +10,7 @@ interface CreatePollFormProps {
 
 export default function CreatePollForm({ onSubmit }: CreatePollFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [categories, setCategories] = useState<{ id: number; name: string; slug: string }[]>([]);
   const { register, handleSubmit, reset, watch, setValue } = useForm<{
     question: string;
     description: string;
@@ -42,6 +43,21 @@ export default function CreatePollForm({ onSubmit }: CreatePollFormProps) {
       }
     } catch {}
   }, [setValue]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/categories');
+        const data = await res.json();
+        if (res.ok && Array.isArray(data)) {
+          setCategories(data);
+          if (data.length && !params.get('category')) {
+            setValue('category', data[0].slug);
+          }
+        }
+      } catch {}
+    })();
+  }, [setValue, params]);
 
   const addOption = () => {
     setValue('options', [...options, '']);
@@ -159,12 +175,20 @@ export default function CreatePollForm({ onSubmit }: CreatePollFormProps) {
           {...register('category', { required: 'Category is required' })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
-          <option value="general">General</option>
-          <option value="technology">Technology</option>
-          <option value="politics">Politics</option>
-          <option value="entertainment">Entertainment</option>
-          <option value="sports">Sports</option>
-          <option value="other">Other</option>
+          {categories.length > 0 ? (
+            categories.map((c) => (
+              <option key={c.id} value={c.slug}>{c.name}</option>
+            ))
+          ) : (
+            <>
+              <option value="general">General</option>
+              <option value="technology">Technology</option>
+              <option value="politics">Politics</option>
+              <option value="entertainment">Entertainment</option>
+              <option value="sports">Sports</option>
+              <option value="other">Other</option>
+            </>
+          )}
         </select>
       </div>
 

@@ -50,6 +50,7 @@ export default function AdminDashboard() {
             <a href="/admin" className="text-[#1A1A1A]">Dashboard</a>
             <a href="/admin/polls" className="text-[#34967C]">Manage Polls</a>
             <a href="/admin/users" className="text-[#34967C]">Manage Users</a>
+            <a href="/admin/categories" className="text-[#34967C]">Manage Categories</a>
             <div>Settings</div>
             <div>Logout</div>
           </nav>
@@ -63,6 +64,7 @@ export default function AdminDashboard() {
             <div className="flex gap-4 text-sm font-medium">
               <a href="/admin/polls" className="text-[#34967C]">Manage Polls</a>
               <a href="/admin/users" className="text-[#34967C]">Manage Users</a>
+              <a href="/admin/categories" className="text-[#34967C]">Manage Categories</a>
             </div>
           </div>
 

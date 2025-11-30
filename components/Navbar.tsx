@@ -79,6 +79,13 @@ export default function Navbar() {
                 </button>
                 {menuOpen && (
                   <div className="absolute right-0 mt-2 w-40 bg-white border border-border rounded-md shadow-md">
+                    <Link
+                      href="/settings"
+                      onClick={() => setMenuOpen(false)}
+                      className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted"
+                    >
+                      Settings
+                    </Link>
                     <button
                       onClick={async () => { setMenuOpen(false); await handleLogout(); }}
                       className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted"

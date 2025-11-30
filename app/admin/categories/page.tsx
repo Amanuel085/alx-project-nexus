@@ -1,46 +1,73 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-const initialCategories = [
-  { id: "1", name: "Electronics", icon: "📱", updated: "2023-10-26 14:30" },
-  { id: "2", name: "Books", icon: "📚", updated: "2023-10-25 10:00" },
-  { id: "3", name: "Fashion", icon: "👗", updated: "2023-10-24 16:15" },
-  { id: "4", name: "Home & Kitchen", icon: "🏠", updated: "2023-10-23 09:45" },
-  { id: "5", name: "Sports & Outdoors", icon: "🏃‍♂️", updated: "2023-10-22 11:20" },
-];
+type Category = { id: number; name: string; slug: string };
+
+function slugify(name: string) {
+  return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
 
 export default function CategoryManagementPage() {
-  const [categories, setCategories] = useState(initialCategories);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [newName, setNewName] = useState("");
-  const [newIcon, setNewIcon] = useState("🏃‍♂️");
   const [search, setSearch] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
-  const handleAddCategory = () => {
+  const load = async () => {
+    setError(null);
+    try {
+      const res = await fetch("/api/categories");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to load categories");
+      setCategories(data || []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load categories");
+    }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const handleAddCategory = async () => {
+    setMessage(null);
+    setError(null);
     if (!newName.trim()) return;
-    const newCategory = {
-      id: Date.now().toString(),
-      name: newName,
-      icon: newIcon,
-      updated: new Date().toISOString().slice(0, 16).replace("T", " "),
-    };
-    setCategories([newCategory, ...categories]);
-    setNewName("");
-    setNewIcon("🏃‍♂️");
+    try {
+      const slug = slugify(newName);
+      const res = await fetch("/api/categories", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: newName.trim(), slug }) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || "Failed to create category");
+      setNewName("");
+      setMessage("Category created");
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to create category");
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setCategories(categories.filter((cat) => cat.id !== id));
+  const handleDelete = async (id: number) => {
+    setMessage(null);
+    setError(null);
+    try {
+      const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || "Failed to delete category");
+      setMessage("Category deleted");
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete category");
+    }
   };
 
-  const filtered = categories.filter((cat) =>
-    cat.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = useMemo(() => categories.filter((cat) => cat.name.toLowerCase().includes(search.toLowerCase())), [categories, search]);
 
   return (
     <main className="min-h-screen bg-white text-[#1A1A1A]">
       <section className="px-8 py-12 max-w-6xl mx-auto">
         <h2 className="text-2xl font-bold mb-6">Category Management</h2>
+        {message && <p className="text-green-600 mb-4 text-sm">{message}</p>}
+        {error && <p className="text-red-600 mb-4 text-sm">{error}</p>}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
           {/* Add Category */}
@@ -50,25 +77,11 @@ export default function CategoryManagementPage() {
               <label className="block text-sm font-medium mb-2">Category Name</label>
               <input
                 type="text"
-                placeholder="e.g., Electronics, Books, Fashion"
+                placeholder="e.g., Technology, Sports"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 className="w-full px-4 py-3 border border-[#E5E5E5] rounded-md text-sm"
               />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Select Icon</label>
-              <select
-                value={newIcon}
-                onChange={(e) => setNewIcon(e.target.value)}
-                className="w-full px-4 py-3 border border-[#E5E5E5] rounded-md text-sm"
-              >
-                <option value="📱">Electronics</option>
-                <option value="📚">Books</option>
-                <option value="👗">Fashion</option>
-                <option value="🏠">Home & Kitchen</option>
-                <option value="🏃‍♂️">Activity</option>
-              </select>
             </div>
             <button
               onClick={handleAddCategory}
@@ -88,11 +101,7 @@ export default function CategoryManagementPage() {
               onChange={(e) => setSearch(e.target.value)}
               className="w-full mb-4 px-4 py-3 border border-[#E5E5E5] rounded-md text-sm"
             />
-            <select className="w-full px-4 py-3 border border-[#E5E5E5] rounded-md text-sm">
-              <option>All Statuses</option>
-              <option>Active</option>
-              <option>Archived</option>
-            </select>
+            <p className="text-xs text-[#7E7B7B]">Use the search to filter categories.</p>
           </div>
         </div>
 
@@ -102,8 +111,8 @@ export default function CategoryManagementPage() {
           <table className="w-full text-sm border border-[#E5E5E5]">
             <thead className="bg-[#F5F5F5]">
               <tr>
-                <th className="text-left p-3">ICON</th>
                 <th className="text-left p-3">CATEGORY NAME</th>
+                <th className="text-left p-3">SLUG</th>
                 <th className="text-left p-3">LAST UPDATED</th>
                 <th className="text-left p-3">ACTIONS</th>
               </tr>
@@ -111,11 +120,10 @@ export default function CategoryManagementPage() {
             <tbody>
               {filtered.map((cat) => (
                 <tr key={cat.id} className="border-t">
-                  <td className="p-3 text-lg">{cat.icon}</td>
                   <td className="p-3">{cat.name}</td>
-                  <td className="p-3">{cat.updated}</td>
+                  <td className="p-3">{cat.slug}</td>
+                  <td className="p-3">—</td>
                   <td className="p-3 space-x-2">
-                    <button className="text-[#34967C] font-medium">Edit</button>
                     <button
                       className="text-red-500 font-medium"
                       onClick={() => handleDelete(cat.id)}
@@ -130,9 +138,7 @@ export default function CategoryManagementPage() {
         </div>
 
         {/* Pagination */}
-        <p className="text-sm text-[#7E7B7B] mt-4">
-          Showing 1–{filtered.length} of {categories.length} categories
-        </p>
+        <p className="text-sm text-[#7E7B7B] mt-4">Showing 1–{filtered.length} of {categories.length} categories</p>
       </section>
     </main>
   );

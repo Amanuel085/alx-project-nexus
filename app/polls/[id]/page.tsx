@@ -99,11 +99,9 @@ export default function PollDetailPage() {
           Submit Vote
         </button>
 
-        {userId && (
+        {userId && poll.created_by === userId && (
           <div className="mt-8 flex gap-3">
-            {poll.created_by === userId && (
-              <Link href={`/polls/${pid}/edit`} className="border border-[#34967C] text-[#34967C] px-4 py-2 rounded-md text-sm">Edit</Link>
-            )}
+            <Link href={`/polls/${pid}/edit`} className="border border-[#34967C] text-[#34967C] px-4 py-2 rounded-md text-sm">Edit</Link>
             <button
               onClick={async () => {
                 try {

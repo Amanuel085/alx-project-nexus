@@ -20,10 +20,16 @@ export default function EditPollPage() {
     (async () => {
       if (!pid) return;
       try {
-        const res = await fetch(`/api/polls/${pid}`);
+        const [res, meRes] = await Promise.all([fetch(`/api/polls/${pid}`), fetch('/api/me')]);
         const data = await res.json();
+        const meData = await meRes.json().catch(() => ({ user: null }));
         if (!res.ok) throw new Error(data.message || "Failed to load poll");
         const row = data as PollRow;
+        const meId = meData?.user?.id ?? null;
+        if (!meId || meId !== (data.created_by as number)) {
+          router.replace(`/polls/${pid}`);
+          return;
+        }
         setTitle(row.question);
         setDescription(row.description || "");
         setOptions((row.options || []).map((o) => o.text));
