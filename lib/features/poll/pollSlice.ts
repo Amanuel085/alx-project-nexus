@@ -160,8 +160,40 @@ export const voteOnPoll = createAsyncThunk<
     const error = await response.json();
     throw new Error(error.message || 'Failed to submit vote');
   }
-  
-  return (await response.json()) as Poll;
+  const afterRes = await fetch(`/api/polls/${pollId}`);
+  if (!afterRes.ok) {
+    const errJson = await afterRes.json().catch(() => null);
+    const msg = errJson && typeof errJson === 'object' && 'message' in (errJson as Record<string, unknown>)
+      ? (errJson as { message?: string }).message
+      : undefined;
+    throw new Error(msg || 'Failed to refresh poll');
+  }
+  type RowOption = { id: number; text: string; votes_count: number };
+  type RowPoll = {
+    id: number;
+    question: string;
+    description?: string | null;
+    image_path?: string | null;
+    options?: RowOption[];
+    category?: string | null;
+    created_at: string;
+    created_by?: string | number;
+    is_active?: number | boolean;
+    total_votes?: number;
+  };
+  const r = (await afterRes.json()) as RowPoll;
+  return {
+    id: String(r.id),
+    question: r.question,
+    description: r.description ?? undefined,
+    imagePath: r.image_path ?? undefined,
+    options: (r.options || []).map((o: RowOption) => ({ id: String(o.id), text: o.text, votes: o.votes_count })),
+    category: r.category || 'other',
+    createdAt: r.created_at,
+    createdBy: String(r.created_by || ''),
+    isActive: r.is_active === undefined ? true : (r.is_active === 1 || r.is_active === true),
+    totalVotes: r.total_votes ?? 0,
+  } as Poll;
 });
 
 // Slice

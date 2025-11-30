@@ -51,7 +51,7 @@ export default function PollsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 bg-white dark:bg-[#0B0B0B] text-[#1A1A1A] dark:text-[#EDEDED]">
+    <div className="container mx-auto px-4 py-8 bg-white text-[#1A1A1A]">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">Polls</h1>
         <button onClick={() => history.back()} className="text-sm text-blue-600 underline">Back</button>

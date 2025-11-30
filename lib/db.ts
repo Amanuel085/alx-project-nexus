@@ -1,6 +1,6 @@
 import mysql from "mysql2/promise";
 
-const url = process.env.DATABASE_URL;
+const url = process.env.DATABASE_URL || (process.env.NODE_ENV !== "production" ? "mysql://root:@localhost:3306/pollify" : undefined);
 
 let pool: mysql.Pool | null = null;
 

@@ -10,6 +10,8 @@ import {
   selectFilteredPolls,
   selectPollError,
   clearPollError,
+  setSearchQuery as setSearchQueryAction,
+  setFilterCategory as setFilterCategoryAction,
 } from '@/lib/features/poll/pollSlice';
 
 export const usePollOperations = () => {
@@ -69,6 +71,14 @@ export const usePollOperations = () => {
     dispatch(clearPollError());
   }, [dispatch]);
 
+  const setSearchQuery = useCallback((value: string) => {
+    dispatch(setSearchQueryAction(value));
+  }, [dispatch]);
+
+  const setFilterCategory = useCallback((value: string) => {
+    dispatch(setFilterCategoryAction(value));
+  }, [dispatch]);
+
   return {
     polls,
     currentPoll,
@@ -79,5 +89,7 @@ export const usePollOperations = () => {
     addPoll,
     vote,
     clearError,
+    setSearchQuery,
+    setFilterCategory,
   };
 };

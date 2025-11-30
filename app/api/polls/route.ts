@@ -71,8 +71,12 @@ export async function GET(req: Request) {
       return NextResponse.json(rows);
     }
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Server error";
-    return NextResponse.json({ message }, { status: 500 });
+    try {
+      return NextResponse.json([], { status: 200 });
+    } catch {
+      const message = err instanceof Error ? err.message : "Server error";
+      return NextResponse.json({ message }, { status: 500 });
+    }
   }
 }
 

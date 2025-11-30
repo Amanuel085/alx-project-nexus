@@ -13,11 +13,13 @@ export async function GET(req: Request) {
   const [active] = await query<CountRow[]>("SELECT COUNT(*) as count FROM polls WHERE is_active = 1");
   const [votes] = await query<CountRow[]>("SELECT COUNT(*) as count FROM votes");
   const [users] = await query<CountRow[]>("SELECT COUNT(*) as count FROM users WHERE role = 'user'");
+  const [newUsers] = await query<CountRow[]>("SELECT COUNT(*) as count FROM users WHERE role = 'user' AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)");
 
   return NextResponse.json({
     totalPolls: polls?.count || 0,
     activePolls: active?.count || 0,
     totalVotes: votes?.count || 0,
     totalUsers: users?.count || 0,
+    newUsers: newUsers?.count || 0,
   });
 }

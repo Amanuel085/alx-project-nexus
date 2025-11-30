@@ -25,26 +25,6 @@ export default function Navbar() {
     })();
   }, [pathname]);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        if (!user) {
-          if (typeof document !== "undefined") document.documentElement.classList.remove("dark");
-          return;
-        }
-        const res = await fetch("/api/user/settings", { cache: "no-store" });
-        const prefs = await res.json().catch(() => ({} as { darkMode?: boolean }));
-        const dm = Boolean(prefs.darkMode);
-        if (typeof document !== "undefined") {
-          document.documentElement.classList.toggle("dark", dm);
-          try {
-            const uid = user?.id ? String(user.id) : "";
-            if (uid) localStorage.setItem("pollify_theme_" + uid, dm ? "dark" : "light");
-          } catch {}
-        }
-      } catch {}
-    })();
-  }, [user]);
 
   const handleLogout = async () => {
     try {
@@ -61,7 +41,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="bg-background border-b border-border dark:bg-[#0B0B0B] dark:text-[#EDEDED]">
+    <header className="bg-white border-b border-border text-[#1A1A1A]">
       <div className="max-w-6xl mx-auto px-6 md:px-8 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-primary text-primary">□</span>
@@ -112,7 +92,7 @@ export default function Navbar() {
                   })()}
                 </button>
                 {menuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121212] border border-border rounded-md shadow-md">
+                  <div className="absolute right-0 mt-2 w-56 bg-white border border-border rounded-md shadow-md">
                     <div className="px-4 py-3 border-b border-border">
                       <div className="text-sm font-semibold">{user.name || "User"}</div>
                       <div className="text-xs text-muted-foreground">{user.email || ""}</div>

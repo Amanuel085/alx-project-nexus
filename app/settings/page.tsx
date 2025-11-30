@@ -11,7 +11,6 @@ export default function SettingsPage() {
   const [pushNotif, setPushNotif] = useState(false);
   const [smsNotif, setSmsNotif] = useState(false);
 
-  const [darkMode, setDarkMode] = useState(false);
   const [savingPrefs, setSavingPrefs] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +25,7 @@ export default function SettingsPage() {
           setEmailNotif(Boolean(data.emailNotif));
           setPushNotif(Boolean(data.pushNotif));
           setSmsNotif(Boolean(data.smsNotif));
-          setDarkMode(Boolean(data.darkMode));
+          // Dark mode removed
         }
       } catch {}
     })();
@@ -66,7 +65,7 @@ export default function SettingsPage() {
     setMessage(null);
     setError(null);
     try {
-      const res = await fetch('/api/user/settings', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ emailNotif, pushNotif, smsNotif, darkMode }) });
+      const res = await fetch('/api/user/settings', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ emailNotif, pushNotif, smsNotif }) });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || 'Failed to save preferences');
       setMessage('Preferences saved');
@@ -78,7 +77,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-white dark:bg-[#0B0B0B] text-[#1A1A1A] dark:text-[#EDEDED]">
+    <main className="min-h-screen bg-white text-[#1A1A1A]">
       <section className="px-8 py-12 max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">App Settings</h2>
@@ -152,24 +151,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Theme */}
-        <div className="mb-12">
-          <h3 className="text-lg font-semibold mb-4">Theme</h3>
-          <div className="flex items-center justify-between border border-border rounded-md p-4">
-            <span className="text-sm">Enable Dark Mode</span>
-            <label className="inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" checked={darkMode} onChange={(e) => setDarkMode(e.target.checked)} />
-              <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:bg-primary relative">
-                <span className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-all peer-checked:left-6" />
-              </div>
-            </label>
-          </div>
-          <div className="pt-2">
-            <button onClick={savePreferences} disabled={savingPrefs} className="bg-[#34967C] text-white px-6 py-3 rounded-md font-medium">
-              {savingPrefs ? 'Saving...' : 'Save Preferences'}
-            </button>
-          </div>
-        </div>
+        
 
         {/* Delete Account */}
         <div className="mb-12">
