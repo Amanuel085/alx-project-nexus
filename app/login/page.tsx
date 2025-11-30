@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const search = useSearchParams();
 
   const handleLogin = async () => {
     setError(null);
@@ -28,7 +29,8 @@ export default function LoginPage() {
       if (data?.role === "admin") {
         router.replace("/admin");
       } else {
-        router.replace("/polls");
+        const ret = search.get("return");
+        router.replace(ret || "/polls");
       }
     } catch (e) {
       const message = e instanceof Error ? e.message : "Login failed";

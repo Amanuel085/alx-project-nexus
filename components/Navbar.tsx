@@ -15,7 +15,7 @@ export default function Navbar() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/me");
+        const res = await fetch("/api/me", { cache: "no-store" });
         const data = await res.json();
         setUser(data.user);
       } catch {
@@ -23,7 +23,7 @@ export default function Navbar() {
       }
       setLoaded(true);
     })();
-  }, []);
+  }, [pathname]);
 
   const handleLogout = async () => {
     try {
@@ -69,6 +69,7 @@ export default function Navbar() {
               {user.role === "admin" && (
                 <Link href="/admin" className="text-sm font-medium text-foreground">Admin</Link>
               )}
+              <Link href="/profile" className="text-sm font-medium text-foreground">Profile</Link>
               <div className="relative">
                 <button
                   onClick={() => setMenuOpen((v) => !v)}

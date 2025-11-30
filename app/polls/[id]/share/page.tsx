@@ -2,14 +2,13 @@
 
 import { useParams } from "next/navigation";
 import { useState } from "react";
-//import { CopyToClipboard } from "react-copy-to-clipboard";
-
-const pollSlug = "project-feedback-survey-q3-2024";
 
 export default function SharePollPage() {
   const { id } = useParams();
   const [copied, setCopied] = useState(false);
-  const pollLink = `https://pollify.com/share/${pollSlug}`;
+  const pid = Array.isArray(id) ? id[0] : id;
+  const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
+  const pollLink = `${origin}/polls/${pid}`;
 
   return (
     <main className="min-h-screen bg-white text-[#1A1A1A]">
@@ -45,16 +44,28 @@ export default function SharePollPage() {
         <div className="mb-12">
           <h3 className="text-lg font-semibold mb-4">Share on Social Media</h3>
           <div className="flex gap-4">
-            <button className="bg-[#4267B2] text-white px-4 py-2 rounded-md text-sm">
+            <button
+              onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pollLink)}`, "_blank")}
+              className="bg-[#4267B2] text-white px-4 py-2 rounded-md text-sm"
+            >
               Facebook
             </button>
-            <button className="bg-black text-white px-4 py-2 rounded-md text-sm">
+            <button
+              onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(pollLink)}&text=${encodeURIComponent('Check out this poll on Pollify!')}`, "_blank")}
+              className="bg-black text-white px-4 py-2 rounded-md text-sm"
+            >
               X (Twitter)
             </button>
-            <button className="bg-[#0077B5] text-white px-4 py-2 rounded-md text-sm">
+            <button
+              onClick={() => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pollLink)}`, "_blank")}
+              className="bg-[#0077B5] text-white px-4 py-2 rounded-md text-sm"
+            >
               LinkedIn
             </button>
-            <button className="bg-[#E1306C] text-white px-4 py-2 rounded-md text-sm">
+            <button
+              onClick={() => window.open(`https://www.instagram.com/`, "_blank")}
+              className="bg-[#E1306C] text-white px-4 py-2 rounded-md text-sm"
+            >
               Instagram
             </button>
           </div>

@@ -10,9 +10,9 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
       return NextResponse.json({ message: "Not found" }, { status: 404 });
     }
     const base = await query<{
-      id: number; question: string; description: string | null; image_path: string | null; created_at: string; total_votes: number; created_by: number; category_id: number | null
+      id: number; question: string; description: string | null; image_path: string | null; created_at: string; total_votes: number; created_by: number; category_id: number | null; is_active: number
     }[]>(
-      "SELECT id, question, description, image_path, created_at, total_votes, created_by, category_id FROM polls WHERE id = ? LIMIT 1",
+      "SELECT id, question, description, image_path, created_at, total_votes, created_by, category_id, is_active FROM polls WHERE id = ? LIMIT 1",
       [idNum]
     );
     if (!base.length) return NextResponse.json({ message: "Not found" }, { status: 404 });
@@ -36,6 +36,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
       created_at: row.created_at,
       total_votes: row.total_votes,
       created_by: row.created_by,
+      is_active: row.is_active === 1,
       category,
       options,
     });
@@ -51,15 +52,26 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   const id = Number(params.id);
   const body = await req.json();
-  await query("UPDATE polls SET question = ?, description = ? WHERE id = ? AND created_by = ?", [body.question, body.description || null, id, Number(user.sub)]);
+  const fields: string[] = [];
+  const values: unknown[] = [];
+  if (typeof body.question === "string") { fields.push("question = ?"); values.push(body.question); }
+  if (typeof body.description === "string" || body.description === null) { fields.push("description = ?"); values.push(body.description ?? null); }
+  if (typeof body.is_active === "boolean") { fields.push("is_active = ?"); values.push(body.is_active ? 1 : 0); }
+  if (!fields.length) return NextResponse.json({ message: "No changes" }, { status: 400 });
+  await query("UPDATE polls SET " + fields.join(", ") + " WHERE id = ? AND (created_by = ? OR ? = 'admin')", [...values, id, Number(user.sub), user.role]);
   return NextResponse.json({ message: "Updated" });
 }
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-  const token = getAuthCookie(req);
-  const user = token ? await verifyToken(token) : null;
-  if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  const id = Number(params.id);
-  await query("DELETE FROM polls WHERE id = ? AND (created_by = ? OR ? = 'admin')", [id, Number(user.sub), user.role]);
-  return NextResponse.json({ message: "Deleted" });
+  try {
+    const token = getAuthCookie(req);
+    const user = token ? await verifyToken(token) : null;
+    if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    const id = Number(params.id);
+    await query("DELETE FROM polls WHERE id = ? AND (created_by = ? OR ? = 'admin')", [id, Number(user.sub), user.role]);
+    return NextResponse.json({ message: "Deleted" });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Server error";
+    return NextResponse.json({ message }, { status: 500 });
+  }
 }

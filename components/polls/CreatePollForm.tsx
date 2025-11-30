@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface CreatePollFormProps {
   onSubmit: (form: FormData) => Promise<void>;
@@ -26,6 +27,21 @@ export default function CreatePollForm({ onSubmit }: CreatePollFormProps) {
 
   const options = watch('options');
   const question = watch('question');
+  const router = useRouter();
+  const params = useSearchParams();
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('createPollDraft');
+      if (raw) {
+        const draft = JSON.parse(raw) as { question?: string; description?: string; options?: string[]; category?: string };
+        if (typeof draft.question === 'string') setValue('question', draft.question);
+        if (typeof draft.description === 'string') setValue('description', draft.description);
+        if (Array.isArray(draft.options) && draft.options.length >= 2) setValue('options', draft.options);
+        if (typeof draft.category === 'string') setValue('category', draft.category);
+      }
+    } catch {}
+  }, [setValue]);
 
   const addOption = () => {
     setValue('options', [...options, '']);
@@ -43,6 +59,22 @@ export default function CreatePollForm({ onSubmit }: CreatePollFormProps) {
     
     try {
       setIsSubmitting(true);
+      const meRes = await fetch('/api/me');
+      const me = await meRes.json().catch(() => ({ user: null }));
+      if (!me?.user) {
+        try {
+          const draft = {
+            question: data.question,
+            description: data.description,
+            options: data.options,
+            category: data.category,
+          };
+          localStorage.setItem('createPollDraft', JSON.stringify(draft));
+        } catch {}
+        const returnTo = '/polls';
+        router.replace(`/login?return=${encodeURIComponent(returnTo)}`);
+        return;
+      }
       const form = new FormData();
       form.append('question', data.question);
       form.append('description', data.description || '');
@@ -52,6 +84,7 @@ export default function CreatePollForm({ onSubmit }: CreatePollFormProps) {
       if (file) form.append('image', file);
       await onSubmit(form);
       reset();
+      try { localStorage.removeItem('createPollDraft'); } catch {}
     } finally {
       setIsSubmitting(false);
     }

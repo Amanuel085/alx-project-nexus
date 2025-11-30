@@ -1,29 +1,40 @@
 "use client";
 
-import { useState } from "react";
-import { useParams } from "next/navigation";
-import Navbar from "@/components/Navbar";
-import Footer from "@/sections/Footer";
-import { v4 as uuidv4 } from "uuid";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 
-const initialPoll = {
-  title: "What's your favorite way to learn new skills?",
-  description:
-    "Help us understand how the community prefers to acquire new knowledge and abilities.",
-  options: [
-    "Online Courses",
-    "Books and Articles",
-    "Hands-on Projects",
-    "Workshops and Seminars",
-    "Mentorship",
-  ],
-};
+type OptionRow = { id: number; text: string; votes_count: number };
+type PollRow = { id: number; question: string; description: string | null; options: OptionRow[]; is_active?: boolean };
 
 export default function EditPollPage() {
   const { id } = useParams();
-  const [title, setTitle] = useState(initialPoll.title);
-  const [description, setDescription] = useState(initialPoll.description);
-  const [options, setOptions] = useState(initialPoll.options);
+  const router = useRouter();
+  const pid = Array.isArray(id) ? id[0] : id;
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [options, setOptions] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      if (!pid) return;
+      try {
+        const res = await fetch(`/api/polls/${pid}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to load poll");
+        const row = data as PollRow;
+        setTitle(row.question);
+        setDescription(row.description || "");
+        setOptions((row.options || []).map((o) => o.text));
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Failed to load poll";
+        setError(msg);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [pid]);
 
   const handleOptionChange = (index: number, value: string) => {
     const updated = [...options];
@@ -39,24 +50,55 @@ export default function EditPollPage() {
     setOptions(options.filter((_, i) => i !== index));
   };
 
-  const handleSaveChanges = () => {
-    console.log("Updated Poll:", { title, description, options });
-    // Dispatch Redux update or API call here
+  const handleSaveChanges = async () => {
+    if (!pid) return;
+    try {
+      const res = await fetch(`/api/polls/${pid}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: title, description }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to update");
+      router.replace(`/polls/${pid}`);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to update";
+      setError(msg);
+    }
   };
 
-  const handleDeletePoll = () => {
-    console.log("Poll deleted:", id);
-    // Dispatch Redux delete or API call here
+  const handleDeletePoll = async () => {
+    if (!pid) return;
+    try {
+      const res = await fetch(`/api/polls/${pid}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to delete");
+      router.replace("/polls");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to delete";
+      setError(msg);
+    }
+  };
+
+  const handleClosePoll = async () => {
+    if (!pid) return;
+    try {
+      const res = await fetch(`/api/polls/${pid}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ is_active: false }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to close poll");
+      router.replace(`/polls/${pid}/results`);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to close poll";
+      setError(msg);
+    }
   };
 
   return (
     <main className="min-h-screen flex flex-col justify-between bg-white text-[#1A1A1A]">
-      <Navbar />
       <section className="px-8 py-12 max-w-3xl mx-auto">
         <h2 className="text-2xl font-bold mb-4">Edit Poll</h2>
         <p className="text-[#7E7B7B] mb-8">
           Update the details and options for your poll.
         </p>
+
+        {loading && <p className="text-[#7E7B7B]">Loading...</p>}
+        {error && <p className="text-red-600">{error}</p>}
 
         <div className="mb-6">
           <label className="block text-sm font-medium mb-2">Poll Title</label>
@@ -121,9 +163,14 @@ export default function EditPollPage() {
           >
             Delete Poll
           </button>
+          <button
+            onClick={handleClosePoll}
+            className="border border-[#34967C] text-[#34967C] px-6 py-3 rounded-md font-medium"
+          >
+            Close Poll
+          </button>
         </div>
       </section>
-      <Footer />
     </main>
   );
 }

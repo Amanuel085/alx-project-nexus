@@ -1,10 +1,8 @@
 "use client";
 
-import {
-  Line,
-  Doughnut,
-  Bar,
-} from "react-chartjs-2";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { Line, Doughnut, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   LineElement,
@@ -29,18 +27,38 @@ ChartJS.register(
 );
 
 export default function PollAnalyticsPage() {
-  const summary = {
-    totalVotes: 1350,
-    avgResponseTime: "1 min 23 sec",
-    completionRate: "85.7%",
-  };
+  const { id } = useParams();
+  const pid = Array.isArray(id) ? id[0] : id;
+  const [totalVotes, setTotalVotes] = useState<number>(0);
+  const [optionVotes, setOptionVotes] = useState<{ text: string; votes_count: number }[]>([]);
+  const [daily, setDaily] = useState<{ day: string; cnt: number }[]>([]);
+  const [recent, setRecent] = useState<{ id: number; participant: string | null; option: string; created_at: string }[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      if (!pid) return;
+      try {
+        const res = await fetch(`/api/polls/${pid}/analytics`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to load analytics");
+        setTotalVotes(data.totalVotes || 0);
+        setOptionVotes(data.optionVotes || []);
+        setDaily(data.daily || []);
+        setRecent(data.recent || []);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Failed to load analytics";
+        setError(msg);
+      }
+    })();
+  }, [pid]);
 
   const lineData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    labels: daily.map((d) => d.day),
     datasets: [
       {
         label: "Votes",
-        data: [50, 100, 200, 300, 400, 500, 600, 700, 800, 950, 1100, 1350],
+        data: daily.map((d) => d.cnt),
         borderColor: "#34967C",
         backgroundColor: "rgba(52, 150, 124, 0.2)",
         fill: true,
@@ -50,39 +68,32 @@ export default function PollAnalyticsPage() {
   };
 
   const donutData = {
-    labels: ["Mobile", "Desktop", "Tablet"],
+    labels: optionVotes.map((o) => o.text),
     datasets: [
       {
-        data: [600, 500, 250],
-        backgroundColor: ["#34967C", "#7E7B7B", "#E5E5E5"],
+        data: optionVotes.map((o) => o.votes_count),
+        backgroundColor: ["#34967C", "#7E7B7B", "#E5E5E5", "#A3A3A3", "#D1D5DB"],
       },
     ],
   };
 
   const barData = {
-    labels: ["Option A", "Option B", "Option C", "Option D", "Option E"],
+    labels: optionVotes.map((o) => o.text),
     datasets: [
       {
         label: "Votes",
-        data: [465, 620, 390, 310, 235],
+        data: optionVotes.map((o) => o.votes_count),
         backgroundColor: "#34967C",
         borderRadius: 6,
       },
     ],
   };
 
-  const responses = [
-    { id: "R1001", name: "Alice J.", option: "Option B", device: "Mobile", time: "2023-11-20 14:30" },
-    { id: "R1002", name: "Bob K.", option: "Option B", device: "Desktop", time: "2023-11-20 14:25" },
-    { id: "R1003", name: "Charlie L.", option: "Option A", device: "Tablet", time: "2023-11-20 14:20" },
-    { id: "R1004", name: "Dana M.", option: "Option C", device: "Desktop", time: "2023-11-20 14:15" },
-    { id: "R1005", name: "Eve N.", option: "Option B", device: "Mobile", time: "2023-11-20 14:10" },
-  ];
-
   return (
     <main className="min-h-screen bg-white text-[#1A1A1A]">
       <section className="px-8 py-12 max-w-6xl mx-auto">
         <h2 className="text-2xl font-bold mb-6">Poll Analytics</h2>
+        {error && <p className="text-red-600 mb-6">{error}</p>}
 
         {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -98,16 +109,16 @@ export default function PollAnalyticsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
           <div className="bg-[#F5F5F5] p-6 rounded-lg shadow-sm">
             <h3 className="text-lg font-semibold mb-2">Total Votes</h3>
-            <p className="text-2xl font-bold text-[#34967C]">{summary.totalVotes.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-[#34967C]">{totalVotes.toLocaleString()}</p>
             <p className="text-xs text-[#7E7B7B] mt-1">Responses collected since poll creation</p>
           </div>
           <div className="bg-[#F5F5F5] p-6 rounded-lg shadow-sm">
-            <h3 className="text-lg font-semibold mb-2">Avg. Response Time</h3>
-            <p className="text-2xl font-bold text-[#34967C]">{summary.avgResponseTime}</p>
+            <h3 className="text-lg font-semibold mb-2">Options Count</h3>
+            <p className="text-2xl font-bold text-[#34967C]">{optionVotes.length}</p>
           </div>
           <div className="bg-[#F5F5F5] p-6 rounded-lg shadow-sm">
-            <h3 className="text-lg font-semibold mb-2">Completion Rate</h3>
-            <p className="text-2xl font-bold text-[#34967C]">{summary.completionRate}</p>
+            <h3 className="text-lg font-semibold mb-2">Days Tracked</h3>
+            <p className="text-2xl font-bold text-[#34967C]">{daily.length}</p>
           </div>
         </div>
 
@@ -118,13 +129,13 @@ export default function PollAnalyticsPage() {
             <Line data={lineData} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold mb-4">Device Breakdown</h3>
+            <h3 className="text-lg font-semibold mb-4">Votes by Option</h3>
             <Doughnut data={donutData} />
           </div>
         </div>
 
         <div className="mb-12">
-          <h3 className="text-lg font-semibold mb-4">Option Popularity Trends</h3>
+          <h3 className="text-lg font-semibold mb-4">Option Popularity</h3>
           <Bar data={barData} />
         </div>
 
@@ -138,18 +149,16 @@ export default function PollAnalyticsPage() {
                   <th className="text-left p-3">Response ID</th>
                   <th className="text-left p-3">Participant</th>
                   <th className="text-left p-3">Option Selected</th>
-                  <th className="text-left p-3">Device</th>
                   <th className="text-left p-3">Timestamp</th>
                 </tr>
               </thead>
               <tbody>
-                {responses.map((r) => (
+                {recent.map((r) => (
                   <tr key={r.id} className="border-t">
                     <td className="p-3">{r.id}</td>
-                    <td className="p-3">{r.name}</td>
+                    <td className="p-3">{r.participant || "Anonymous"}</td>
                     <td className="p-3">{r.option}</td>
-                    <td className="p-3">{r.device}</td>
-                    <td className="p-3">{r.time}</td>
+                    <td className="p-3">{r.created_at}</td>
                   </tr>
                 ))}
               </tbody>

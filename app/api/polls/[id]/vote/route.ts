@@ -3,19 +3,30 @@ import { query } from "@/lib/db";
 import { getAuthCookie, verifyToken } from "@/lib/auth";
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
-  const token = getAuthCookie(req);
-  const user = token ? await verifyToken(token) : null;
-  const { optionId } = await req.json();
-  const pollId = Number(params.id);
-  if (!optionId) return NextResponse.json({ message: "Missing optionId" }, { status: 400 });
+  try {
+    const token = getAuthCookie(req);
+    const user = token ? await verifyToken(token) : null;
+    if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
-  const voterId = user ? Number(user.sub) : null;
-  const existing = await query<{ id: number }[]>("SELECT id FROM votes WHERE poll_id = ? AND user_id = ?", [pollId, voterId]);
-  if (existing.length) return NextResponse.json({ message: "Already voted" }, { status: 409 });
+    const body = await req.json().catch(() => ({} as { optionId?: string | number }));
+    const pollId = Number(params.id);
+    const optionIdNum = Number(body.optionId);
+    if (!Number.isFinite(optionIdNum) || optionIdNum <= 0) return NextResponse.json({ message: "Missing optionId" }, { status: 400 });
 
-  await query("INSERT INTO votes (poll_id, option_id, user_id) VALUES (?, ?, ?)", [pollId, Number(optionId), voterId]);
-  await query("UPDATE poll_options SET votes_count = votes_count + 1 WHERE id = ?", [Number(optionId)]);
-  await query("UPDATE polls SET total_votes = total_votes + 1 WHERE id = ?", [pollId]);
+    const voterId = Number(user.sub);
+    const checkOpt = await query<{ id: number }[]>("SELECT id FROM poll_options WHERE id = ? AND poll_id = ?", [optionIdNum, pollId]);
+    if (!checkOpt.length) return NextResponse.json({ message: "Invalid option" }, { status: 400 });
 
-  return NextResponse.json({ message: "Vote recorded" }, { status: 201 });
+    const existing = await query<{ id: number }[]>("SELECT id FROM votes WHERE poll_id = ? AND user_id = ?", [pollId, voterId]);
+    if (existing.length) return NextResponse.json({ message: "Already voted" }, { status: 409 });
+
+    await query("INSERT INTO votes (poll_id, option_id, user_id) VALUES (?, ?, ?)", [pollId, optionIdNum, voterId]);
+    await query("UPDATE poll_options SET votes_count = votes_count + 1 WHERE id = ?", [optionIdNum]);
+    await query("UPDATE polls SET total_votes = total_votes + 1 WHERE id = ?", [pollId]);
+
+    return NextResponse.json({ message: "Vote recorded" }, { status: 201 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Server error";
+    return NextResponse.json({ message }, { status: 500 });
+  }
 }
