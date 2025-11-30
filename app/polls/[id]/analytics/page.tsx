@@ -40,8 +40,13 @@ export default function PollAnalyticsPage() {
       if (!pid) return;
       try {
         const res = await fetch(`/api/polls/${pid}/analytics`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Failed to load analytics");
+        let data = await res.json();
+        if (!res.ok) {
+          const res2 = await fetch(`/api/polls/analytics?id=${pid}`);
+          const data2 = await res2.json();
+          if (!res2.ok) throw new Error(data2.message || "Failed to load analytics");
+          data = data2;
+        }
         setTotalVotes(data.totalVotes || 0);
         setOptionVotes(data.optionVotes || []);
         setDaily(data.daily || []);
@@ -90,7 +95,7 @@ export default function PollAnalyticsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-white text-[#1A1A1A]">
+    <main className="min-h-screen bg-white dark:bg-[#0B0B0B] text-[#1A1A1A] dark:text-[#EDEDED]">
       <section className="px-8 py-12 max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Poll Analytics</h2>

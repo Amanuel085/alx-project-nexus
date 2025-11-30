@@ -59,7 +59,7 @@ export default function PollResultsPage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col justify-between bg-white text-[#1A1A1A]">
+    <main className="min-h-screen flex flex-col justify-between bg-white dark:bg-[#0B0B0B] text-[#1A1A1A] dark:text-[#EDEDED]">
       <section className="px-8 py-12 max-w-3xl mx-auto">
         <div className="flex items-center justify-end mb-4">
           <button onClick={() => history.back()} className="text-sm text-[#34967C] underline">Back</button>

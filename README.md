@@ -19,6 +19,17 @@ Pollify is a modern, full‑stack polling application built on Next.js App Route
 - Admin management: polls, users, contact messages
 - Secure session via HttpOnly cookie
 
+## Recent Updates
+- Fixed poll detail errors with strict id validation and robust fallbacks
+- Implemented owner‑only actions for edit/delete/close/share/analytics
+- Added Share page QR code generation for each poll
+- Made Settings functional: password change via email verification, account deletion via email confirmation, preferences save/load
+- Implemented per‑user Dark Mode with a toggle in Settings and global application across pages
+- Admin Categories page: create/delete categories reflected in Create Poll form
+- Voting improvements: strict id checks, option validation, one‑vote enforcement
+- Analytics: added endpoints and UI that summarize votes, options, and recent responses
+- Added Back buttons and UX polish across screens
+
 ## Repository Structure
 - `app/` – Next.js App Router pages and API route handlers
   - `app/page.tsx` – Homepage (Hero with calls to action)
@@ -139,6 +150,9 @@ CREATE TABLE contacts (
   - `PATCH /api/polls/:id` – update question/description (owner)
   - `DELETE /api/polls/:id` – delete poll (owner or admin)
   - `POST /api/polls/:id/vote` – vote on an option; prevents double voting
+  - `POST /api/polls/vote?id=...` – vote fallback using query param
+  - `GET /api/polls/:id/analytics` – analytics for a poll
+  - `GET /api/polls/analytics?id=...` – analytics fallback using query param
 
 - Categories
   - `GET /api/categories` – list categories
@@ -174,6 +188,35 @@ CREATE TABLE contacts (
 - Install dependencies: `npm install`
 - Run dev server: `npm run dev`
 - Lint: `npm run lint`
+
+## Deploying to Vercel
+1. Ensure `.env.local` is complete with DB and SMTP credentials
+2. Push repository to GitHub/GitLab/Bitbucket
+3. Create a Vercel account and import the project
+4. Configure Environment Variables in Vercel Dashboard
+   - `DATABASE_URL`
+   - `AUTH_SECRET`
+   - `MAIL_FROM`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`
+5. Set Build & Output
+   - Framework: Next.js
+   - Build Command: `npm run build`
+   - Output Directory: `.next`
+6. Set Vercel Project Settings
+   - Enable Serverless Functions
+   - Set Node version matching local (via `.nvmrc` or Vercel settings)
+7. Provision MySQL (if not already)
+   - Use a managed MySQL provider (PlanetScale, Neon MySQL, etc.)
+   - Update `DATABASE_URL` to the managed instance
+8. Run initial deploy
+9. Post‑deploy checks
+   - Verify `/api/auth/signup` and email delivery
+   - Test poll creation, voting, analytics
+   - Confirm Dark Mode toggles per user after login
+10. Set custom domain (optional)
+   - Add domain in Vercel, update DNS to Vercel nameservers
+
+## Help Center
+- A new Help Center is available at `/help` covering creation, voting, managing polls, and themes.
 
 ## Notes
 - Email sending uses SMTP envs; for Gmail, generate an App Password.

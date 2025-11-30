@@ -46,15 +46,25 @@ export default function PollDetailPage() {
 
   const handleVote = async () => {
     if (!selectedOption || !pid || !isNumeric) return;
+    if (!/^\d+$/.test(selectedOption)) { setError("Please select an option"); return; }
     try {
       const res = await fetch(`/api/polls/${pid}/vote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ optionId: selectedOption }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to vote");
-      const refreshed = await (await fetch(`/api/polls/${pid}`)).json();
+      await res.json();
+      if (!res.ok) {
+        const res2 = await fetch(`/api/polls/vote?id=${pid}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ optionId: selectedOption }) });
+        const data2 = await res2.json();
+        if (!res2.ok) throw new Error(data2.message || "Failed to vote");
+      }
+      const refreshedRes = await fetch(`/api/polls/${pid}`);
+      let refreshed = await refreshedRes.json();
+      if (!refreshedRes.ok) {
+        const r2 = await fetch(`/api/polls?id=${pid}`);
+        refreshed = await r2.json();
+      }
       setPoll(refreshed);
       setSelectedOption("");
     } catch (e) {
@@ -72,7 +82,7 @@ export default function PollDetailPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col justify-between bg-white text-[#1A1A1A]">
+    <main className="min-h-screen flex flex-col justify-between bg-white dark:bg-[#0B0B0B] text-[#1A1A1A] dark:text-[#EDEDED]">
       <section className="px-8 py-12 max-w-3xl mx-auto">
         <div className="flex items-center justify-end mb-4">
           <button onClick={() => history.back()} className="text-sm text-[#34967C] underline">Back</button>

@@ -41,7 +41,7 @@ export default function AdminDashboard() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-white text-[#1A1A1A]">
+    <main className="min-h-screen bg-white dark:bg-[#0B0B0B] text-[#1A1A1A] dark:text-[#EDEDED]">
       <div className="flex">
         {/* Sidebar */}
         <aside className="w-64 bg-[#F5F5F5] p-6 hidden md:block">

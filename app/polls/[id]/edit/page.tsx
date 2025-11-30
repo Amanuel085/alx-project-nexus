@@ -16,6 +16,7 @@ export default function EditPollPage() {
   const [options, setOptions] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -35,7 +36,6 @@ export default function EditPollPage() {
         }
         const meRes = await fetch('/api/me');
         const meData = await meRes.json().catch(() => ({ user: null }));
-        if (!res.ok) throw new Error(data.message || "Failed to load poll");
         const row = data as PollRow;
         const meId = meData?.user?.id ?? null;
         if (!meId || meId !== (data.created_by as number)) {
@@ -72,8 +72,12 @@ export default function EditPollPage() {
     if (!pid) return;
     try {
       const res = await fetch(`/api/polls/${pid}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: title, description }) });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to update");
+      await res.json();
+      if (!res.ok) {
+        const res2 = await fetch(`/api/polls?id=${pid}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: title, description }) });
+        const data2 = await res2.json();
+        if (!res2.ok) throw new Error(data2.message || "Failed to update");
+      }
       router.replace(`/polls/${pid}`);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Failed to update";
@@ -85,8 +89,12 @@ export default function EditPollPage() {
     if (!pid) return;
     try {
       const res = await fetch(`/api/polls/${pid}`, { method: "DELETE" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to delete");
+      await res.json();
+      if (!res.ok) {
+        const res2 = await fetch(`/api/polls?id=${pid}`, { method: "DELETE" });
+        const data2 = await res2.json();
+        if (!res2.ok) throw new Error(data2.message || "Failed to delete");
+      }
       router.replace("/polls");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Failed to delete";
@@ -108,7 +116,7 @@ export default function EditPollPage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col justify-between bg-white text-[#1A1A1A]">
+    <main className="min-h-screen flex flex-col justify-between bg-white dark:bg-[#0B0B0B] text-[#1A1A1A] dark:text-[#EDEDED]">
       <section className="px-8 py-12 max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold">Edit Poll</h2>
@@ -178,12 +186,7 @@ export default function EditPollPage() {
           >
             Save Changes
           </button>
-          <button
-            onClick={handleDeletePoll}
-            className="border border-red-500 text-red-500 px-6 py-3 rounded-md font-medium"
-          >
-            Delete Poll
-          </button>
+          <button onClick={() => setConfirmDelete(true)} className="border border-red-500 text-red-500 px-6 py-3 rounded-md font-medium">Delete Poll</button>
           <button
             onClick={handleClosePoll}
             className="border border-[#34967C] text-[#34967C] px-6 py-3 rounded-md font-medium"
@@ -191,6 +194,18 @@ export default function EditPollPage() {
             Close Poll
           </button>
         </div>
+        {confirmDelete && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+            <div className="bg-white dark:bg-[#111] border border-[#E5E5E5] rounded-md p-6 w-[420px]">
+              <h4 className="text-lg font-semibold mb-2">Confirm Delete</h4>
+              <p className="text-sm text-[#7E7B7B] mb-6">This cannot be undone. Delete this poll?</p>
+              <div className="flex justify-end gap-3">
+                <button onClick={() => setConfirmDelete(false)} className="px-3 py-2 text-sm border border-[#E5E5E5] rounded-md">Cancel</button>
+                <button onClick={async () => { setConfirmDelete(false); await handleDeletePoll(); }} className="bg-red-600 text-white px-3 py-2 rounded-md text-sm">Delete</button>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
     </main>
   );

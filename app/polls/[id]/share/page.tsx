@@ -12,7 +12,7 @@ export default function SharePollPage() {
   const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(pollLink)}`;
 
   return (
-    <main className="min-h-screen bg-white text-[#1A1A1A]">
+    <main className="min-h-screen bg-white dark:bg-[#0B0B0B] text-[#1A1A1A] dark:text-[#EDEDED]">
       <section className="px-8 py-12 max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Share Your Poll</h2>

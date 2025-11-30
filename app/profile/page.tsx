@@ -40,7 +40,7 @@ export default function ProfilePage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-white text-[#1A1A1A]">
+    <main className="min-h-screen bg-white dark:bg-[#0B0B0B] text-[#1A1A1A] dark:text-[#EDEDED]">
       <section className="px-8 py-12 max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">

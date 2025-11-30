@@ -18,6 +18,7 @@ export default function RootLayout({
       <head>
         <title>Pollify</title>
         <meta name="description" content="Create, vote, and decide together. Your voice matters." />
+        <script dangerouslySetInnerHTML={{ __html: `(() => { try { var d = document.documentElement; var uid = ''; var m = localStorage.getItem('pollify_theme_' + uid); if (m === 'dark') { d.classList.add('dark'); } else { d.classList.remove('dark'); } } catch {} })();` }} />
       </head>
       <body className="bg-background text-foreground">
         <ReduxProvider>

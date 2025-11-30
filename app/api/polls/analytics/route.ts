@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 
-export async function GET(_: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request) {
   try {
-    const idStr = String(params.id ?? "").trim();
-    const id = Number.parseInt(idStr, 10);
+    const url = new URL(req.url);
+    const idParam = url.searchParams.get("id");
+    const id = Number.parseInt(String(idParam ?? "").trim(), 10);
     if (!Number.isFinite(id) || !Number.isInteger(id) || id <= 0) return NextResponse.json({ message: "Not found" }, { status: 404 });
 
     const exists = await query<{ id: number }[]>("SELECT id FROM polls WHERE id = ?", [id]);

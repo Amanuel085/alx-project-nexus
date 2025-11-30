@@ -15,6 +15,7 @@ export default function SettingsPage() {
   const [savingPrefs, setSavingPrefs] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -38,7 +39,7 @@ export default function SettingsPage() {
       const res = await fetch('/api/user/password', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ currentPassword, newPassword }) });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || 'Failed to update password');
-      setMessage('Password updated');
+      setMessage('Verification email sent');
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
@@ -54,8 +55,7 @@ export default function SettingsPage() {
       const res = await fetch('/api/user/delete', { method: 'POST' });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || 'Failed to delete account');
-      await fetch('/api/auth/logout', { method: 'POST' });
-      window.location.href = '/';
+      setMessage('Confirmation email sent');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to delete account');
     }
@@ -78,7 +78,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-white text-[#1A1A1A]">
+    <main className="min-h-screen bg-white dark:bg-[#0B0B0B] text-[#1A1A1A] dark:text-[#EDEDED]">
       <section className="px-8 py-12 max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">App Settings</h2>
@@ -112,12 +112,7 @@ export default function SettingsPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full px-4 py-3 border rounded-md text-sm"
             />
-            <button
-              onClick={handleSavePassword}
-              className="bg-[#34967C] text-white px-6 py-3 rounded-md font-medium"
-            >
-              Save Changes
-            </button>
+            <button onClick={handleSavePassword} className="bg-[#34967C] text-white px-6 py-3 rounded-md font-medium">Send Verification</button>
           </div>
         </div>
 
@@ -160,14 +155,20 @@ export default function SettingsPage() {
         {/* Theme */}
         <div className="mb-12">
           <h3 className="text-lg font-semibold mb-4">Theme</h3>
-          <label className="flex items-center justify-between">
-            <span>Dark Mode</span>
-            <input
-              type="checkbox"
-              checked={darkMode}
-              onChange={() => setDarkMode(!darkMode)}
-            />
-          </label>
+          <div className="flex items-center justify-between border border-border rounded-md p-4">
+            <span className="text-sm">Enable Dark Mode</span>
+            <label className="inline-flex items-center cursor-pointer">
+              <input type="checkbox" className="sr-only peer" checked={darkMode} onChange={(e) => setDarkMode(e.target.checked)} />
+              <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:bg-primary relative">
+                <span className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-all peer-checked:left-6" />
+              </div>
+            </label>
+          </div>
+          <div className="pt-2">
+            <button onClick={savePreferences} disabled={savingPrefs} className="bg-[#34967C] text-white px-6 py-3 rounded-md font-medium">
+              {savingPrefs ? 'Saving...' : 'Save Preferences'}
+            </button>
+          </div>
         </div>
 
         {/* Delete Account */}
@@ -176,12 +177,19 @@ export default function SettingsPage() {
           <p className="text-sm text-[#7E7B7B] mb-4">
             Permanently delete your account and all associated data. This action cannot be undone.
           </p>
-          <button
-            onClick={handleDeleteAccount}
-            className="border border-red-500 text-red-500 px-6 py-3 rounded-md font-medium"
-          >
-            Delete Account
-          </button>
+          <button onClick={() => setConfirmOpen(true)} className="border border-red-500 text-red-500 px-6 py-3 rounded-md font-medium">Delete Account</button>
+          {confirmOpen && (
+            <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+              <div className="bg-white border border-[#E5E5E5] rounded-md p-6 w-[420px]">
+                <h4 className="text-lg font-semibold mb-2">Confirm Deletion</h4>
+                <p className="text-sm text-[#7E7B7B] mb-6">This cannot be undone. Proceed?</p>
+                <div className="flex justify-end gap-3">
+                  <button onClick={() => setConfirmOpen(false)} className="px-3 py-2 text-sm border border-[#E5E5E5] rounded-md">Cancel</button>
+                  <button onClick={async () => { setConfirmOpen(false); await handleDeleteAccount(); }} className="bg-red-600 text-white px-3 py-2 rounded-md text-sm">Send Confirmation</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
     </main>

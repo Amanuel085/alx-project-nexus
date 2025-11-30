@@ -76,6 +76,42 @@ export async function GET(req: Request) {
   }
 }
 
+export async function PATCH(req: Request) {
+  const token = getAuthCookie(req);
+  const user = token ? await verifyToken(token) : null;
+  if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  const url = new URL(req.url);
+  const idParam = url.searchParams.get("id");
+  const id = Number.parseInt(String(idParam ?? "").trim(), 10);
+  if (!Number.isFinite(id) || !Number.isInteger(id) || id <= 0) return NextResponse.json({ message: "Not found" }, { status: 404 });
+  const body = await req.json().catch(() => ({}));
+  const fields: string[] = [];
+  const values: unknown[] = [];
+  if (typeof body.question === "string") { fields.push("question = ?"); values.push(body.question); }
+  if (typeof body.description === "string" || body.description === null) { fields.push("description = ?"); values.push(body.description ?? null); }
+  if (typeof body.is_active === "boolean") { fields.push("is_active = ?"); values.push(body.is_active ? 1 : 0); }
+  if (!fields.length) return NextResponse.json({ message: "No changes" }, { status: 400 });
+  await query("UPDATE polls SET " + fields.join(", ") + " WHERE id = ? AND (created_by = ? OR ? = 'admin')", [...values, id, Number(user.sub), user.role]);
+  return NextResponse.json({ message: "Updated" });
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const token = getAuthCookie(req);
+    const user = token ? await verifyToken(token) : null;
+    if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    const url = new URL(req.url);
+    const idParam = url.searchParams.get("id");
+    const id = Number.parseInt(String(idParam ?? "").trim(), 10);
+    if (!Number.isFinite(id) || !Number.isInteger(id) || id <= 0) return NextResponse.json({ message: "Not found" }, { status: 404 });
+    await query("DELETE FROM polls WHERE id = ? AND (created_by = ? OR ? = 'admin')", [id, Number(user.sub), user.role]);
+    return NextResponse.json({ message: "Deleted" });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Server error";
+    return NextResponse.json({ message }, { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const token = getAuthCookie(req);
