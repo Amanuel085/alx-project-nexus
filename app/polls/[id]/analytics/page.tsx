@@ -95,7 +95,7 @@ export default function PollAnalyticsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-white dark:bg-[#0B0B0B] text-[#1A1A1A] dark:text-[#EDEDED]">
+    <main className="min-h-screen bg-white text-[#1A1A1A]">
       <section className="px-8 py-12 max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Poll Analytics</h2>

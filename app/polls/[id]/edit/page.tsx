@@ -116,7 +116,7 @@ export default function EditPollPage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col justify-between bg-white dark:bg-[#0B0B0B] text-[#1A1A1A] dark:text-[#EDEDED]">
+    <main className="min-h-screen flex flex-col justify-between bg-white text-[#1A1A1A]">
       <section className="px-8 py-12 max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold">Edit Poll</h2>
@@ -195,8 +195,8 @@ export default function EditPollPage() {
           </button>
         </div>
         {confirmDelete && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-            <div className="bg-white dark:bg-[#111] border border-[#E5E5E5] rounded-md p-6 w-[420px]">
+          <div className="fixed inset-0 bg-white/60 flex items-center justify-center">
+            <div className="bg-white border border-[#E5E5E5] rounded-md p-6 w-[420px]">
               <h4 className="text-lg font-semibold mb-2">Confirm Delete</h4>
               <p className="text-sm text-[#7E7B7B] mb-6">This cannot be undone. Delete this poll?</p>
               <div className="flex justify-end gap-3">
